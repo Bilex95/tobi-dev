@@ -11,7 +11,7 @@
     "build": "astro build",
     "preview": "astro preview --port 4321",
     "check": "astro check",
-    "test": "c8 --reporter=text --reporter=lcov node --import tsx --test 'test/unit/**/*.test.ts' 'test/component/**/*.test.ts' 'test/content/**/*.test.ts'",
+    "test": "c8 --reporter=text --reporter=lcov node --import tsx --import ./test/support/astro-register.mjs --test 'test/unit/**/*.test.ts' 'test/component/**/*.test.ts' 'test/content/**/*.test.ts'",
     "test:build": "node --import tsx --test 'test/build/**/*.test.ts'",
     "test:e2e": "playwright test",
     "test:xbrowser": "playwright test -c playwright.cross-browser.config.ts",

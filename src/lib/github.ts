@@ -68,9 +68,18 @@ export async function loadProjects(opts: {
     if (!res.ok) throw new Error(`GitHub API ${res.status}`);
     const raw = await res.json();
     const projects = (raw as any[]).filter((r) => !r.fork && !r.private).map(normalizeRepo);
-    return applyOverrides(filterPortfolio(projects), overrides);
+    const portfolio = applyOverrides(filterPortfolio(projects), overrides);
+    // No repos are topic-tagged `portfolio` yet: treat as a cache-miss so the
+    // seeded cache renders instead of an empty gallery.
+    if (portfolio.length === 0) throw new Error('NO_PORTFOLIO_REPOS');
+    return portfolio;
   } catch (err) {
-    console.warn(`[github] falling back to cache: ${(err as Error).message}`);
+    const message = (err as Error).message;
+    console.warn(
+      message === 'NO_PORTFOLIO_REPOS'
+        ? '[github] no portfolio-tagged repos yet, using cache'
+        : `[github] falling back to cache: ${message}`,
+    );
     const cached: Project[] = JSON.parse(await readFile(cachePath, 'utf8'));
     return applyOverrides(cached, overrides);
   }

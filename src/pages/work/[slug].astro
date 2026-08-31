@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import { loadProjects } from '../../lib/github.ts';
+import type { Project } from '../../lib/github.ts';
+
+export async function getStaticPaths() {
+  const projects = await loadProjects({ token: import.meta.env.GITHUB_TOKEN });
+  return projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+}
+
+const { project } = Astro.props as { project: Project };
+const updated = new Date(project.pushedAt).toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+const tags = project.topics.filter((t) => t !== 'portfolio');
+---
+
+<Base title={`${project.name} — Tobi-dev`} description={project.description}>
+  <article class="project">
+    <p><a href="/work">← Back to work</a></p>
+    <h1>{project.name}</h1>
+    {project.blurb && <p class="blurb">{project.blurb}</p>}
+    <p>{project.description}</p>
+    <ul class="tags" aria-label="Tech tags">
+      {tags.map((t) => <li>{t}</li>)}
+    </ul>
+    <p class="meta">Last updated <time datetime={project.pushedAt}>{updated}</time></p>
+    <p class="links">
+      <a href={project.url}>Code</a>
+      {project.homepage && <a href={project.homepage}>Live</a>}
+    </p>
+  </article>
+</Base>

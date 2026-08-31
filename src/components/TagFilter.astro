@@ -1,0 +1,29 @@
+---
+interface Props {
+  tags: string[];
+}
+
+const { tags } = Astro.props as Props;
+---
+
+<div class="tag-filter" data-tag-filter role="group" aria-label="Filter projects by tag">
+  <button type="button" data-tag="*" aria-pressed="true">All</button>
+  {tags.map((t) => <button type="button" data-tag={t} aria-pressed="false">{t}</button>)}
+</div>
+
+<script>
+  for (const group of document.querySelectorAll<HTMLElement>('[data-tag-filter]')) {
+    const buttons = Array.from(group.querySelectorAll<HTMLButtonElement>('button[data-tag]'));
+    group.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement | null;
+      const btn = target?.closest<HTMLButtonElement>('button[data-tag]');
+      if (!btn) return;
+      const tag = btn.dataset.tag ?? '*';
+      for (const b of buttons) b.setAttribute('aria-pressed', String(b === btn));
+      for (const card of document.querySelectorAll<HTMLElement>('[data-project]')) {
+        const match = tag === '*' || card.matches(`[data-tags~="${tag}"]`);
+        card.hidden = !match;
+      }
+    });
+  }
+</script>

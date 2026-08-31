@@ -1,0 +1,19 @@
+---
+import type { Project } from '../lib/github.ts';
+
+const { project } = Astro.props as { project: Project };
+const text = project.blurb ?? project.description;
+---
+
+<article class="card">
+  {project.thumbnail && <img src={project.thumbnail} alt={`${project.name} preview`} loading="lazy" />}
+  <h3><a href={`/work/${project.slug}`}>{project.name}</a></h3>
+  {text && <p>{text}</p>}
+  <ul class="tags" aria-label="Tech tags">
+    {project.topics.filter((t) => t !== 'portfolio').map((t) => <li>{t}</li>)}
+  </ul>
+  <p class="links">
+    <a href={project.url}>Code</a>
+    {project.homepage && <a href={project.homepage}>Live</a>}
+  </p>
+</article>

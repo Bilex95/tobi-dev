@@ -4,11 +4,36 @@
 
 /* ---------------------------------------------------------------------------
    Theme tokens
-   Light is the default on :root. Dark applies either via an explicit
-   [data-theme="dark"] opt-in or via the OS preference when the user has not
-   explicitly forced light with [data-theme="light"].
+   Dark is the default on :root, so a no-JS / no-OS-preference visit resolves
+   to dark. Light applies via the OS preference (unless the user has explicitly
+   forced dark with [data-theme="dark"]) or via an explicit [data-theme="light"]
+   opt-in. An explicit [data-theme] choice wins in both directions.
 --------------------------------------------------------------------------- */
 :root {
+  --bg: #0d1117;
+  --fg: #e6edf3;
+  --muted: #9aa7b2;
+  --accent: #6ea8ff;
+  --border: #262c34;
+  --card: #161b22;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --bg: #ffffff;
+    --fg: #14171a;
+    --muted: #5b6570;
+    --accent: #2f6feb;
+    --border: #e4e7eb;
+    --card: #f6f8fa;
+
+    color-scheme: light;
+  }
+}
+
+:root[data-theme='light'] {
   --bg: #ffffff;
   --fg: #14171a;
   --muted: #5b6570;
@@ -28,19 +53,6 @@
   --card: #161b22;
 
   color-scheme: dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --bg: #0d1117;
-    --fg: #e6edf3;
-    --muted: #9aa7b2;
-    --accent: #6ea8ff;
-    --border: #262c34;
-    --card: #161b22;
-
-    color-scheme: dark;
-  }
 }
 
 /* ---------------------------------------------------------------------------

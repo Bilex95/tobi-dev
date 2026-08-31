@@ -16,6 +16,18 @@ const { title, description } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      (function () {
+        try {
+          var s = localStorage.getItem('tobi-theme');
+          var mql = window.matchMedia('(prefers-color-scheme: light)');
+          var t = s === 'light' || s === 'dark' ? s : mql.matches ? 'light' : 'dark';
+          document.documentElement.dataset.theme = t;
+        } catch (e) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
   </head>

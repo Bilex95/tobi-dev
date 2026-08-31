@@ -1,0 +1,102 @@
+---
+// Client-only theme toggle. Initial state is set by the inline <head> script in
+// Base.astro (no-flash); this button just flips and persists the choice.
+---
+
+<button type="button" aria-label="Toggle color theme" data-theme-toggle>
+  <svg
+    class="icon icon-sun"
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path
+      d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
+    ></path>
+  </svg>
+  <svg
+    class="icon icon-moon"
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+
+<style>
+  [data-theme-toggle] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    color: var(--fg);
+    background-color: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  [data-theme-toggle]:hover {
+    background-color: var(--card);
+  }
+
+  .icon {
+    display: block;
+  }
+
+  /* Show the icon for the theme you would switch *to*. */
+  :global(:root[data-theme='dark']) .icon-moon,
+  :global(:root:not([data-theme='light'])) .icon-moon {
+    display: none;
+  }
+
+  :global(:root[data-theme='light']) .icon-sun {
+    display: none;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :global(:root:not([data-theme='dark'])) .icon-moon {
+      display: block;
+    }
+    :global(:root:not([data-theme='dark'])) .icon-sun {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { nextTheme, THEME_KEY } from '../lib/theme.ts';
+
+  const btn = document.querySelector('[data-theme-toggle]');
+
+  function currentTheme(): 'light' | 'dark' {
+    return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  }
+
+  btn?.setAttribute('aria-pressed', String(currentTheme() === 'dark'));
+
+  btn?.addEventListener('click', () => {
+    const t = nextTheme(currentTheme());
+    document.documentElement.dataset.theme = t;
+    try {
+      localStorage.setItem(THEME_KEY, t);
+    } catch {}
+    btn.setAttribute('aria-pressed', String(t === 'dark'));
+  });
+</script>

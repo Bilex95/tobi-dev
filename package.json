@@ -25,8 +25,7 @@
     "@astrojs/mdx": "^4.3.14",
     "@astrojs/sitemap": "^3.7.4",
     "@astrojs/tailwind": "^6.0.2",
-    "astro": "^5.18.2",
-    "astro-og-canvas": "^0.13.0"
+    "astro": "^5.18.2"
   },
   "overrides": {
     "rollup": "npm:@rollup/wasm-node@^4"

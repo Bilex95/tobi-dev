@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import { loadProjects } from '../lib/github.ts';
+import { personJsonLd } from '../lib/seo.ts';
 import { getCollection } from 'astro:content';
 
 const projects = await loadProjects({ token: import.meta.env.GITHUB_TOKEN });
@@ -18,6 +19,7 @@ const email = 'sammybilex@gmail.com';
 <Base
   title="Tobi-dev — QA automation & AI engineer"
   description="Portfolio of Tobi-dev: QA automation and AI engineering work, case studies, and writing."
+  jsonLd={personJsonLd()}
 >
   <Hero />
 

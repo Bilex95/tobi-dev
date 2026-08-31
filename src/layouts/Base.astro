@@ -2,13 +2,18 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { buildMeta } from '../lib/seo.ts';
 
 interface Props {
   title: string;
   description: string;
+  path?: string;
+  image?: string;
+  jsonLd?: object;
 }
 
-const { title, description } = Astro.props;
+const { title, description, path = Astro.url.pathname, image, jsonLd } = Astro.props;
+const meta = buildMeta({ title, description, path, image });
 ---
 
 <!doctype html>
@@ -26,8 +31,18 @@ const { title, description } = Astro.props;
         }
       })();
     </script>
-    <title>{title}</title>
-    <meta name="description" content={description} />
+    <title>{meta.title}</title>
+    {
+      meta.tags.map((t) =>
+        t.property ? (
+          <meta property={t.property} content={t.content} />
+        ) : (
+          <meta name={t.name} content={t.content} />
+        ),
+      )
+    }
+    <link rel="canonical" href={meta.canonical} />
+    {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body>
     <a href="#main" class="skip-link">Skip to content</a>

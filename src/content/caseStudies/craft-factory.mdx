@@ -5,21 +5,239 @@ role: "Solo build"
 timeframe: "August 2026"
 stack: ["Node.js", "GitHub Actions", "Astro", "Zod", "Cron"]
 repo: "https://github.com/Bilex95/craft-factory"
-summary: "A scheduled pipeline that drafts new portfolio entries on Tuesdays and refines them on Thursdays, keeping a live site current without manual authoring."
+summary: "A GitHub Actions pipeline that publishes a small public project every Tuesday and posts a refinement pass every Thursday, so a portfolio grows on a schedule instead of on motivation."
 order: 2
 draft: false
 ---
 
+import Diagram from '../../components/Diagram.astro';
+
 ## Context
 
-_TODO in Task 6._
+craft-factory is the breadth piece in this portfolio. Where assertkit is one tool
+thought about carefully, this is a live piece of automation that has been running
+against my real GitHub account, creating real repositories, since August 2026.
+
+The premise is unglamorous. A portfolio is a compounding asset that decays on a
+weekly timescale, and building it depends on motivation, which does not arrive
+weekly. Every "I'll ship a small project each week" plan I had made previously
+died in week three. So instead of trying harder, I moved the schedule out of my
+head and into cron, and made the default state of the system *doing something*
+rather than *waiting for me*.
+
+The campaign target is roughly 13 public repos over a three-month run, one per
+week, each one QA-forward.
 
 ## Problem
 
+**A weekly cadence needs a system, not a reminder.** A reminder tells you to do
+work you were already not doing. What I needed was a pipeline where the work
+happens and my job shrinks to reviewing it.
+
+**But a fully automatic project factory produces landfill.** If a bot creates
+thirteen repos and nobody ever returns to them, the portfolio is worse than
+empty — it is thirteen pieces of evidence that I ship and abandon. The first
+version of this pipeline had exactly that flaw: "every Wednesday, one new repo",
+and nothing that ever looked backwards.
+
+**Rotation has to actually rotate.** The original approach picked which lane
+(Playwright, API testing, reporting, and so on) to build next by indexing off the
+ISO week number. That looks fine and is quietly broken: ISO weeks wrap at year
+boundaries, a skipped run silently burns a slot, and two runs in the same week
+collide. I found it by reading, not by it failing, which is its own kind of luck.
+
+**And a bot that writes to GitHub needs real credentials with real blast radius.**
+Getting the permission model right was, in wall-clock terms, the hardest part of
+the project.
+
 ## What I built
+
+A repo of Node scripts driven by one GitHub Actions workflow,
+`.github/workflows/craft-project.yml`, on the cron `5 11 * * 2,4` — Tuesdays and
+Thursdays. A `decide` job reads the weekday and routes to one of two lanes.
+
+<Diagram caption="One cron, one decide job, two lanes. Tuesday publishes a new repo and a digest issue; Thursday reviews what already exists and posts a checklist, but never commits code.">
+  <svg viewBox="0 0 720 290" focusable="false" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" fill="currentColor">
+    <defs>
+      <marker id="cf-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="currentColor" />
+      </marker>
+    </defs>
+    <g stroke="currentColor" stroke-width="1.4" fill="none" marker-end="url(#cf-arrow)">
+      <path d="M118 134 H146" />
+      <path d="M256 134 H292 V62 H322" />
+      <path d="M256 134 H292 V218 H322" />
+      <path d="M418 62 H446" />
+      <path d="M418 218 H446" />
+      <path d="M566 62 H594" />
+      <path d="M566 218 H594" />
+    </g>
+    <g stroke="currentColor" stroke-width="1.4" fill="none">
+      <rect x="8" y="106" width="110" height="56" rx="6" />
+      <rect x="146" y="106" width="110" height="56" rx="6" />
+      <rect x="322" y="34" width="96" height="56" rx="6" />
+      <rect x="446" y="26" width="120" height="72" rx="6" />
+      <rect x="594" y="34" width="116" height="56" rx="6" />
+      <rect x="322" y="190" width="96" height="56" rx="6" />
+      <rect x="446" y="182" width="120" height="72" rx="6" />
+      <rect x="594" y="190" width="116" height="56" rx="6" />
+    </g>
+    <g text-anchor="middle">
+      <text x="63" y="130">cron</text>
+      <text x="63" y="145">5 11 * * 2,4</text>
+      <text x="201" y="130">decide job</text>
+      <text x="201" y="145">routes by weekday</text>
+      <text x="370" y="58">Tuesday</text>
+      <text x="370" y="73">generate.js</text>
+      <text x="506" y="48">create repo, set topics,</text>
+      <text x="506" y="66">open good-first-issue,</text>
+      <text x="506" y="84">commit manifest entry</text>
+      <text x="652" y="58">digest issue</text>
+      <text x="652" y="73">posted</text>
+      <text x="370" y="214">Thursday</text>
+      <text x="370" y="229">refine.js</text>
+      <text x="506" y="204">review checklist</text>
+      <text x="506" y="222">plus rot scan over</text>
+      <text x="506" y="240">published repos</text>
+      <text x="652" y="207">refinement issue</text>
+      <text x="652" y="222">posted —</text>
+      <text x="652" y="237">never commits code</text>
+    </g>
+    <text x="201" y="180" text-anchor="middle" font-size="10">lane index from repos.json length</text>
+  </svg>
+</Diagram>
+
+### Tuesday — `scripts/generate.js`
+
+Picks the next lane off the queue, drafts a small project, then does the GitHub
+work: creates the public repo, sets its topics, opens a `good-first-issue` so the
+repo is not born empty of invitation, commits a manifest entry back to
+`repos.json`, and posts a digest issue summarising what shipped.
+
+### Thursday — `scripts/refine.js`
+
+The half that makes the pipeline honest. It posts a review checklist against
+already-published repos and runs a **rot scan** — a pass looking for the ways a
+small repo quietly goes stale, of the kind where the README has drifted from the
+code or an opened issue was never answered. The output is an issue. It never
+commits code.
+
+The queue is deliberately QA-forward rather than general-purpose. Currently
+waiting: `009-cart-checks` (Cypress), `010-api-drift` (API contract testing), and
+`011-report-to-md` (turning a test report into readable Markdown).
 
 ## Key decisions & tradeoffs
 
+**Splitting one weekly run into Tuesday-new and Thursday-refine.** This was the
+main rework (commit `b923d84`, which also renamed `weekly-project.yml` to
+`craft-project.yml`). The original single Wednesday run only ever moved forward.
+Adding a second, backwards-looking day cost me nothing in infrastructure — the
+same workflow, one extra cron field, a `decide` job — and changed what the
+pipeline is: it now has an opinion about maintenance, not just about volume.
+
+> A pipeline that only creates is a pipeline that produces debt on a schedule.
+> The second day is not extra output; it is the part that keeps the first day's
+> output worth linking to.
+
+**Thursday posts issues and never commits.** `refine.js` could open pull requests.
+I decided it should not. A bot that edits published repos unattended will
+eventually push something wrong to something public, and the recovery cost is
+paid in credibility, not in `git revert`. An issue is a suggestion I can ignore;
+a commit is a change I have to notice. Given the whole point of the project is
+that I am *not* watching closely, the asymmetry matters.
+
+> Every automated write to a public repo should be one that is cheap to be wrong
+> about. Issues are cheap. Commits to published work are not.
+
+**Rotation indexes off `repos.json`, not the calendar.** I replaced the ISO-week
+index with an index derived from the length of the manifest — that is, from how
+many projects have actually been published. It is boring and it is correct: a
+missed run does not burn a lane, a double run does not collide, and the year
+boundary is irrelevant because the calendar is no longer an input. The tradeoff
+is that the schedule no longer tells you which lane comes next; you have to read
+the manifest. Worth it.
+
+**A classic PAT with `repo` scope, and the three attempts it took.** This is the
+part I would have skipped in a writeup a year ago, so here it is in full:
+
+1. An expired classic PAT → `401`. Fast to diagnose, embarrassing to admit.
+2. A fine-grained token, which is the *correct-looking* modern choice → the run
+   got further and then failed with `Resource not accessible by personal access
+   token`. Fine-grained tokens scope to repositories that already exist; this
+   pipeline's whole job is creating repositories that do not.
+3. A classic token with `repo` scope → success.
+
+The tradeoff is uncomfortable and I want to name it rather than hide it: a
+classic `repo`-scoped PAT is broader than I would like, stored as the secret
+`GH_PAT`. The pipeline needs repo-creation, which fine-grained tokens on a user
+account did not give me. The mitigations are that it only runs from one workflow
+in one repo, it only ever creates public repos, and the destructive surface is
+kept small by the "issues, not commits" rule above. `ANTHROPIC_API_KEY` is
+optional and only feeds a generator fallback, so an absent key degrades the run
+rather than failing it.
+
+**Model bumped `claude-sonnet-4-6` → `claude-sonnet-5`** in `scripts/generate.js`.
+Sonnet, not Opus, because this lane is high-volume drafting where a human reviews
+the result on Thursday anyway — the money belongs in assertkit's triage path, not
+here.
+
 ## Verification
 
+This one is verified the way a pipeline should be: by running it against
+production, because there is no other production.
+
+- **A full `new` run, end to end, in August 2026.** It published the repo
+  `carousel-a11y-fix`: created it, set its topics, opened the good-first-issue,
+  committed the manifest entry (`f61e18a`), and posted the digest issue. Every
+  step is an artifact I can point at rather than a log line I am asking you to
+  trust.
+- **A full `refine` run**, which posted the refinement-pass issue against the
+  published set.
+- **Both lanes route correctly** off the `decide` job, confirmed by the two runs
+  landing in different jobs from the same workflow file.
+- **A shell-quoting bug caught by a real run, not by a test.** Issue bodies
+  contain backticks — they are Markdown. Those bodies were being interpolated
+  into an `execSync` command string, so the shell ate the backticks and executed
+  what was between them. The output looked *almost* right, which is the worst
+  kind of wrong. Fixed in commit `12f0f90` by switching to `execFileSync` with
+  `--body-file -` and piping the body over stdin, which removes the shell from
+  the path entirely rather than escaping around it.
+
+That bug is the clearest lesson in the project: string-interpolating
+user-or-model-generated content into a shell command is a bug waiting for the
+right input, and the fix is never better escaping — it is not using a shell.
+
 ## Results & what's next
+
+The pipeline is live and has published real repos on its own schedule. Both
+lanes have run against production. The two bugs I found — the ISO-week rotation
+and the shell quoting — were both the quiet kind that produce plausible-looking
+output, and both are fixed with the class of problem removed rather than the
+instance patched.
+
+The honest caveat is that at time of writing the campaign is early. I can show
+you a working pipeline and its first published repos; I cannot yet show you
+thirteen weeks of unattended running. The measurement that matters — how many
+Thursday checklists I actually act on — needs months, not weeks.
+
+Next:
+
+1. **Run the campaign to term** and report the real completion rate, including
+   the weeks the pipeline ran and I ignored it.
+2. **Close the loop into this site**, so a published repo appears in the projects
+   list without me editing content by hand.
+3. **Make the rot scan assert rather than suggest** — start with the mechanical
+   checks (lockfile present, CI badge resolving, README code blocks still
+   matching the source) which can be checked, not judged.
+
+**Explicitly out of scope for v1:**
+
+- Any automated commit or pull request to a *published* repo — Thursday posts
+  issues only.
+- Private repositories; the pipeline creates public repos exclusively.
+- A dashboard, web UI, or hosted service — the interface is GitHub issues and
+  the Actions run log.
+- Multi-account or organisation support; it targets one user account.
+- Automatic deletion, archiving, or unpublishing of anything it created.
+- Fine-grained token support, until user-account repo creation is available
+  under one.

@@ -5,21 +5,287 @@ role: "Solo build"
 timeframe: "August 2026"
 stack: ["Node.js", "Playwright", "node:test", "Anthropic SDK", "GitHub Actions"]
 repo: "https://github.com/Bilex95/assertkit"
-summary: "A CLI that turns acceptance criteria into reviewed Playwright specs and classifies test failures so CI can gate on real regressions."
+summary: "A Node CLI that turns acceptance criteria into review-ready Playwright specs and classifies failing runs, so CI can gate on real regressions instead of on flake."
 order: 1
 draft: false
 ---
 
+import Diagram from '../../components/Diagram.astro';
+
 ## Context
 
-_TODO in Task 6._
+I built assertkit in August 2026 as a solo project. It is the depth piece in this
+portfolio: one repo that shows how I think about test design and how I keep a
+non-deterministic tool honest inside a deterministic pipeline. The breadth piece,
+craft-factory, is the other case study on this site.
+
+The idea came from watching how "AI writes your tests" tooling actually gets used.
+A model emits a spec file, someone skims it, it goes green, it gets merged. Six
+weeks later the suite has forty tests nobody trusts and a red build means "re-run
+it". Generation was never the hard part. The hard part is the two moments where a
+human's judgement is genuinely needed:
+
+1. Deciding whether a generated test asserts the **right** thing.
+2. Deciding what a red run actually **means**.
+
+assertkit is a Node CLI with exactly two commands, aimed at those two moments.
 
 ## Problem
 
+**Turning acceptance criteria into tests is lossy, and the loss is invisible.**
+Take a criterion like "the user sees an error when the due date is in the past."
+That leaves at least four things open: which error text, where it renders, whether
+it blocks submission, and what happens to the rest of the form. A model will pick
+an answer for all four and bury the choices inside a single assertion. By the time
+a reviewer reads `expect(page.getByText('Invalid date')).toBeVisible()`, the
+decisions have already been made and made silently. That is what makes AI test
+review shallow — not laziness, but the fact that there is nothing visible to
+disagree with.
+
+**Triage is where junior QA time disappears.** A red run of any size is a pile of
+stack traces with no ranking. The rational move for a tired engineer is to re-run
+it; two failures pass on the retry, and the habit of shrugging at red builds sets
+in. Real regressions then hide behind flake fatigue. The costly work is not
+running the suite, it is deciding which of eleven failures deserves a human.
+
+**And the tool itself has to be testable.** assertkit's core dependency returns
+different text on every call. If I could not unit test it without burning API
+credits on each run, I would not have shipped it.
+
+Constraints I set going in: solo, no budget, the full test suite must run in CI
+with no API key present, and a hiring manager should be able to understand the
+whole thing in ten minutes of reading.
+
 ## What I built
+
+A Node CLI, `assertkit`, with two commands, a demo app to prove them against, and
+a docs page on the testing approach.
+
+### `assertkit generate <spec.md>`
+
+Reads a Markdown file of acceptance criteria and writes **two** files: a Playwright
+spec, and a sibling review-notes file that lists every assumption the model made
+to get there.
+
+```
+$ assertkit generate specs/due-dates.md
+  wrote tests/due-dates.spec.js
+  wrote tests/due-dates.review-notes.md   (6 assumptions to check)
+```
+
+The review-notes file is the point of the command. It looks like this:
+
+```markdown
+## Assumptions
+
+- AC-2 "sees an error" — assumed inline text below the field, not a toast.
+  Asserted on role=alert rather than exact copy.
+- AC-2 — assumed the submit button stays enabled; the criterion does not say.
+  If submission is meant to be blocked, this test will pass on a broken build.
+- AC-3 "past date" — assumed the boundary is exclusive (today is valid).
+```
+
+That third bullet is the whole value proposition. It is a boundary-condition
+question that a reviewer can answer in five seconds and that a generated test
+would otherwise silently decide.
+
+`generate` does not run the test and does not commit it. It writes to disk and
+stops.
+
+### `assertkit triage <report.json>`
+
+Takes Playwright's JSON reporter output and classifies each failure into one of
+four fixed buckets, each with a written rationale:
+
+| Bucket | Meaning | CI effect |
+| --- | --- | --- |
+| `real-regression` | The app changed and it is wrong | exit 1 |
+| `flake` | Timing, race, or ordering; the app is fine | exit 0 |
+| `environment` | Fixture, port, seed data, or missing service | exit 0 |
+| `assertion-too-strict` | The test is wrong, not the app | exit 0 |
+
+The exit code is the product. `triage` exits 1 if *any* failure is classified as a
+real regression, and 0 otherwise, so a CI job can gate on it directly instead of
+gating on "did anything go red".
+
+<Diagram caption="The two assertkit commands. generate always produces a review-notes file alongside the spec and stops before running anything; triage collapses a red run into a single exit code that CI can gate on.">
+  <svg viewBox="0 0 720 300" focusable="false" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" fill="currentColor">
+    <defs>
+      <marker id="ak-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="currentColor" />
+      </marker>
+    </defs>
+    <g stroke="currentColor" stroke-width="1.4" fill="none" marker-end="url(#ak-arrow)">
+      <path d="M102 66 H134" />
+      <path d="M258 66 H286" />
+      <path d="M396 66 H413 V38 H424" />
+      <path d="M396 66 H413 V94 H424" />
+      <path d="M562 38 H579 V66 H590" />
+      <path d="M562 94 H579 V66 H590" />
+      <path d="M102 224 H134" />
+      <path d="M258 224 H286" />
+      <path d="M396 224 H424" />
+      <path d="M562 224 H590" />
+    </g>
+    <g stroke="currentColor" stroke-width="1.4" fill="none">
+      <rect x="10" y="44" width="92" height="44" rx="6" />
+      <rect x="134" y="44" width="124" height="44" rx="6" />
+      <rect x="286" y="44" width="110" height="44" rx="6" />
+      <rect x="424" y="18" width="138" height="40" rx="6" />
+      <rect x="424" y="74" width="138" height="40" rx="6" />
+      <rect x="590" y="44" width="120" height="44" rx="6" />
+      <rect x="10" y="202" width="92" height="44" rx="6" />
+      <rect x="134" y="202" width="124" height="44" rx="6" />
+      <rect x="286" y="202" width="110" height="44" rx="6" />
+      <rect x="424" y="180" width="138" height="88" rx="6" />
+      <rect x="590" y="196" width="120" height="56" rx="6" />
+    </g>
+    <g text-anchor="middle">
+      <text x="56" y="70">spec.md</text>
+      <text x="196" y="63">assertkit</text>
+      <text x="196" y="78">generate</text>
+      <text x="341" y="63">Claude</text>
+      <text x="341" y="78">(claude-opus-5)</text>
+      <text x="493" y="42">tests/name.spec.js</text>
+      <text x="493" y="91">name.review-notes.md</text>
+      <text x="650" y="63">human reviews,</text>
+      <text x="650" y="78">then commits</text>
+      <text x="56" y="228">report.json</text>
+      <text x="196" y="221">assertkit</text>
+      <text x="196" y="236">triage</text>
+      <text x="341" y="221">Claude</text>
+      <text x="341" y="236">(claude-opus-5)</text>
+      <text x="493" y="200">real-regression</text>
+      <text x="493" y="218">flake</text>
+      <text x="493" y="236">environment</text>
+      <text x="493" y="254">assertion-too-strict</text>
+      <text x="650" y="213">exit 1 if any</text>
+      <text x="650" y="228">real-regression,</text>
+      <text x="650" y="243">else exit 0</text>
+    </g>
+    <g font-size="10" letter-spacing="0.08em">
+      <text x="10" y="28">GENERATE — HUMAN IN THE LOOP</text>
+      <text x="10" y="166">TRIAGE — MACHINE DECIDES, CI GATES</text>
+    </g>
+  </svg>
+</Diagram>
+
+### The demo app
+
+`demo-app/` is a dependency-free "TaskBoard" — plain HTML, CSS, and JavaScript
+behind a tiny static server — plus a hand-written baseline Playwright suite.
+It exists so the tool has something real to be demonstrated against, and so
+the generated output can be compared against tests I wrote myself. Keeping it
+dependency-free means `npm ci` at the repo root installs exactly one runtime
+dependency tree and the demo never rots because of a transitive bump.
 
 ## Key decisions & tradeoffs
 
+**Two output files, not one.** The obvious design is a single spec file with the
+assumptions as `//` comments. I split them because comments inside a generated
+file get skimmed with the code they annotate, whereas a separate file with a
+count in the CLI output ("6 assumptions to check") is a review artifact in its own
+right. The cost is a second file to keep in sync and one more thing to delete
+before committing.
+
+> The generated test is not the deliverable. The list of things the model had to
+> guess is the deliverable — the test is just what those guesses compile to.
+
+**`generate` never runs and never commits.** I deliberately did not add a
+`--run` or `--commit` flag, even though both are two lines of code. A tool that
+can produce a green checkmark on code nobody read is worse than no tool, because
+the checkmark is what stops the reading. The tradeoff is real friction: you cannot
+go from spec to merged test in one command, and that is intended.
+
+**A fixed four-bucket taxonomy instead of free-text rationale.** Free text reads
+better and is useless to a machine. Four buckets means `triage` can produce an
+exit code, which means CI can act on it. I picked the four by going through my own
+past red builds and asking what I actually did next in each case — the answer was
+always one of: fix the app, re-run and forget, fix the fixture, fix the test.
+Anything a model cannot fit into those four is a signal the failure needs a human
+anyway, so the classifier is instructed to fall back to `real-regression`, the
+only bucket that fails the build.
+
+> Defaulting an ambiguous classification to `real-regression` means the tool's
+> failure mode is a false alarm, not a shipped bug. That asymmetry is the only
+> reason I would let a language model near a merge gate.
+
+**Structure-based assertions for AI output.** The tests in `tests/ai-output.spec.js`
+never assert on exact model strings. They assert on structure and invariants: the
+review-notes file parses as Markdown with an `## Assumptions` heading, every
+triage classification is one of the four literals, every classification carries a
+non-empty rationale, and the generated spec parses as valid JavaScript. The
+question a test like that answers is not "did the model say the right words" but
+"is the output still in the shape the rest of the pipeline depends on" — and only
+the second question has a stable answer. I wrote the pattern up in
+`docs/testing-ai-output.md` because it was the part I had to reason hardest about,
+and it generalises past this repo.
+
+**Mocked client for units, real client for a small e2e slice.** All 30 `node:test`
+unit tests mock `@anthropic-ai/sdk`, so they run in milliseconds, offline, and for
+free. The four tests that exercise a live model are e2e and **skip** when
+`ANTHROPIC_API_KEY` is absent rather than failing. That keeps a fork's CI green
+without secrets, at the cost of a suite whose meaning depends on the environment:
+a green run is only fully green if you check *how many* tests actually ran. I
+accepted that because the alternative — a repo that cannot be cloned and tested
+by anyone but me — is worse.
+
+**Model pinned, not hardcoded.** The default is `claude-opus-5`, overridable via
+`AIQA_MODEL`. Pinning means the output does not drift under me between runs; the
+env var means the pin is not a wall when a cheaper model is good enough for
+`triage`.
+
 ## Verification
 
+Everything below was run against a clean clone in August 2026.
+
+- **`npm ci` from a clean checkout: clean.** `package-lock.json` is committed and
+  CI uses `npm ci`, not `npm install`, so the lockfile is actually load-bearing
+  rather than decorative.
+- **Unit tests: 30/30 passing** under `node:test`, with the Anthropic client
+  mocked. No network, no key, no cost.
+- **End-to-end: 10 passed, 4 skipped.** The four skips are the live-model
+  AI-output tests; they run when `ANTHROPIC_API_KEY` is present in the
+  environment.
+- **A real bug found by the suite, not by me.** The baseline filter test in the
+  demo app hit a Playwright strict-mode violation — my locator resolved to more
+  than one element, so the test was asserting against whichever node happened to
+  come first. Fixed in commit `6d667bf` by tightening the locator to a single
+  match. It is a small fix and I am including it deliberately: the test was
+  wrong in a way that still went green locally, which is the failure mode this
+  whole project is about.
+- **Design rationale is written down** in `docs/DESIGN.md`, alongside
+  `docs/testing-ai-output.md`. If someone disagrees with the four-bucket
+  taxonomy, the argument they need to attack is on the page.
+
+The thing I have *not* verified is longitudinal accuracy: I do not have months of
+real red builds to measure the classifier against, so I cannot quote a precision
+number for `triage`. I would rather say that plainly than invent one.
+
 ## Results & what's next
+
+The repo does what I set out to build. Both commands work against the demo app,
+the suite runs offline in CI, and the design decisions are documented well enough
+that someone can argue with them. As a portfolio artifact it does the job I wanted:
+it gives an interviewer something specific to push on — the taxonomy, the two-file
+output, the skip-vs-fail choice — rather than a feature list.
+
+What I would do next, roughly in order of value:
+
+1. **Measure the triage classifier.** Collect a labelled corpus of real failures
+   and report per-bucket precision and recall. Right now the argument for the tool
+   is structural, not empirical, and that is the weakest part of it.
+2. **Feed triage history back into generate.** If a spec keeps producing tests
+   later classified `assertion-too-strict`, the generator should learn that
+   without me telling it.
+3. **A `--diff` mode for `generate`** that regenerates against an updated spec and
+   shows what changed in the assumptions, so spec drift is reviewable.
+
+**Explicitly out of scope for v1:**
+
+- Self-healing locators — the tool never rewrites a test to make it pass.
+- Visual regression testing.
+- Frameworks other than Playwright (no Cypress, WebdriverIO, or Selenium adapter).
+- Any path that runs or commits generated tests automatically.
+- A hosted service, dashboard, or web UI — assertkit is a local CLI and a CI step.
+- Non-JavaScript target languages for generated specs.

@@ -4,18 +4,19 @@ import { resolveInitialTheme, nextTheme, THEME_KEY } from '../../src/lib/theme.t
 
 test('THEME_KEY is stable', () => assert.equal(THEME_KEY, 'tobi-theme'));
 
-test('stored value wins over system preference', () => {
-  assert.equal(resolveInitialTheme('light', true), 'light');
-  assert.equal(resolveInitialTheme('dark', false), 'dark');
+test('a persisted choice wins', () => {
+  assert.equal(resolveInitialTheme('light'), 'light');
+  assert.equal(resolveInitialTheme('dark'), 'dark');
 });
 
-test('no stored value: dark is default, but light system pref is honoured', () => {
-  assert.equal(resolveInitialTheme(null, true), 'dark');
-  assert.equal(resolveInitialTheme(null, false), 'light');
+test('no stored value: dark is the default (OS preference is not consulted)', () => {
+  assert.equal(resolveInitialTheme(null), 'dark');
+  // an absent / non-string value also resolves to dark
+  assert.equal(resolveInitialTheme(undefined as any), 'dark');
 });
 
 test('invalid stored value is ignored', () => {
-  assert.equal(resolveInitialTheme('banana', true), 'dark');
+  assert.equal(resolveInitialTheme('banana'), 'dark');
 });
 
 test('nextTheme flips', () => {

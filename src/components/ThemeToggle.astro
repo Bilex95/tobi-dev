@@ -56,27 +56,23 @@
     background-color: var(--card);
   }
 
+  /* Show the icon for the theme you would switch *to*. The inline <head>
+     script always sets [data-theme], so this is driven purely by that
+     attribute — the OS preference is never consulted. */
   .icon {
     display: block;
   }
 
-  /* Show the icon for the theme you would switch *to*. */
-  :global(:root[data-theme='dark']) .icon-moon,
-  :global(:root:not([data-theme='light'])) .icon-moon {
+  .icon-sun {
     display: none;
   }
 
-  :global(:root[data-theme='light']) .icon-sun {
-    display: none;
+  :global(:root[data-theme='dark']) .icon-sun {
+    display: block;
   }
 
-  @media (prefers-color-scheme: light) {
-    :global(:root:not([data-theme='dark'])) .icon-moon {
-      display: block;
-    }
-    :global(:root:not([data-theme='dark'])) .icon-sun {
-      display: none;
-    }
+  :global(:root[data-theme='dark']) .icon-moon {
+    display: none;
   }
 </style>
 

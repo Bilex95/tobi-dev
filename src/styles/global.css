@@ -4,10 +4,15 @@
 
 /* ---------------------------------------------------------------------------
    Theme tokens
-   Dark is the default on :root, so a no-JS / no-OS-preference visit resolves
-   to dark. Light applies via the OS preference (unless the user has explicitly
-   forced dark with [data-theme="dark"]) or via an explicit [data-theme="light"]
-   opt-in. An explicit [data-theme] choice wins in both directions.
+   Dark is the default on :root. The initial theme is dark unless a persisted
+   choice (applied as [data-theme="light"] by the inline <head> script) says
+   otherwise; the OS `prefers-color-scheme` is NOT consulted for the initial
+   theme. An explicit [data-theme] choice always wins.
+
+   The single `prefers-color-scheme: light` block below is a no-JS-only
+   progressive enhancement: it is scoped to `:root:not([data-theme])`, so it
+   applies only when the inline script never ran and can never override an
+   explicit [data-theme].
 --------------------------------------------------------------------------- */
 :root {
   --bg: #0d1117;
@@ -21,7 +26,7 @@
 }
 
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme='dark']) {
+  :root:not([data-theme]) {
     --bg: #ffffff;
     --fg: #14171a;
     --muted: #5b6570;

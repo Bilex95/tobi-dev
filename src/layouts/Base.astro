@@ -20,9 +20,7 @@ const { title, description } = Astro.props;
       (function () {
         try {
           var s = localStorage.getItem('tobi-theme');
-          var mql = window.matchMedia('(prefers-color-scheme: light)');
-          var t = s === 'light' || s === 'dark' ? s : mql.matches ? 'light' : 'dark';
-          document.documentElement.dataset.theme = t;
+          document.documentElement.dataset.theme = s === 'light' || s === 'dark' ? s : 'dark';
         } catch (e) {
           document.documentElement.dataset.theme = 'dark';
         }

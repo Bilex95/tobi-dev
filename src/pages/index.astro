@@ -1,10 +1,132 @@
 ---
 import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { loadProjects } from '../lib/github.ts';
+import { getCollection } from 'astro:content';
+
+const projects = await loadProjects({ token: import.meta.env.GITHUB_TOKEN });
+const featured = projects.filter((p) => p.featured);
+
+const caseStudies = (await getCollection('caseStudies'))
+  .filter((e) => !e.data.draft)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const email = 'sammybilex@gmail.com';
 ---
 
 <Base
   title="Tobi-dev — QA automation & AI engineer"
   description="Portfolio of Tobi-dev: QA automation and AI engineering work, case studies, and writing."
 >
-  <h1>Tobi-dev</h1>
+  <Hero />
+
+  <section class="section" aria-labelledby="featured-heading">
+    <h2 id="featured-heading">Featured</h2>
+    <div class="grid">
+      {
+        featured.map((p) => (
+          <div data-project data-tags={p.topics.join(' ')}>
+            <ProjectCard project={p} />
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="case-studies-heading">
+    <h2 id="case-studies-heading">Case studies</h2>
+    <ul class="cs-strip">
+      {
+        caseStudies.map((cs) => (
+          <li class="cs-card">
+            <h3>
+              <a href={`/case-studies/${cs.data.slug}`}>{cs.data.title}</a>
+            </h3>
+            <p>{cs.data.summary}</p>
+            <p class="cs-more">
+              <a href={`/case-studies/${cs.data.slug}`}>
+                Read case study<span class="sr-only"> — {cs.data.title}</span>
+              </a>
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="contact-heading">
+    <h2 id="contact-heading">Contact</h2>
+    <p>Open to QA-automation and AI engineering roles.</p>
+    <ul class="contact-strip">
+      <li><a href={`mailto:${email}`}>Email</a></li>
+      <li><a href="https://github.com/Bilex95" rel="me">GitHub</a></li>
+      <li>
+        <a href="https://www.linkedin.com/in/oluwatobiloba-bilewu" rel="me">
+          LinkedIn
+        </a>
+      </li>
+    </ul>
+  </section>
 </Base>
+
+<style>
+  .section {
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .section h2 {
+    font-size: 1.5rem;
+    margin: 0 0 1.25rem;
+  }
+  .grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+  .cs-strip,
+  .contact-strip {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .cs-strip {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+  .cs-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background-color: var(--card);
+    padding: 1.25rem;
+  }
+  .cs-card h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.125rem;
+  }
+  .cs-card p {
+    margin: 0 0 0.75rem;
+    color: var(--muted);
+  }
+  .cs-more {
+    margin: 0;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .contact-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 1rem;
+  }
+</style>

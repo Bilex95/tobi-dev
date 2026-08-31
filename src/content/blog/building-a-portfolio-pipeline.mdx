@@ -1,0 +1,43 @@
+---
+title: "Building a portfolio that maintains itself"
+date: 2026-08-31
+summary: "Why craft-factory publishes a repo on a schedule, and how this site keeps its projects current without me editing anything."
+draft: false
+---
+
+I got tired of portfolio rot. Every few months I would notice the projects page was
+stale, spend an evening patching it, and then watch it drift again. So I split the
+problem in two: a pipeline that produces work on a schedule, and a site that reads
+that work automatically.
+
+The pipeline is craft-factory, a public GitHub Actions project. It builds a portfolio
+by publishing a small public repo on a schedule and posting a digest issue that
+summarises what shipped. In August I reworked its cadence into two lanes. Tuesday is
+the new-project run: it creates a repo and files the digest. Thursday is a refinement
+pass that posts a checklist and a "rot scan" over the existing repos but never commits
+code itself. Keeping the refinement lane read-only was deliberate. I want it to
+surface problems, not quietly rewrite things while I am not looking.
+
+The bug I remember most was in the rotation logic. The pipeline picks a lane and an
+approach for each run, and the old scheme keyed that choice off the ISO week number.
+Around year boundaries the week count resets, so entries got skipped or repeated. I
+changed it to index off the length of `repos.json` instead, which is a plain count
+that only ever grows. It is a small change, but it is the difference between a
+rotation that is predictable and one that quietly desyncs once a year.
+
+While I was in there I bumped the generator model to `claude-sonnet-5` and confirmed
+the whole thing end to end: one new run published a repo called `carousel-a11y-fix`,
+and one refinement run posted its issue. The campaign target is roughly thirteen
+repos over a three-month, one-per-week run.
+
+This site is the other half. The projects gallery does not carry a hand-maintained
+list. At build time it pulls my public repos tagged `portfolio` and renders them, so
+anything craft-factory publishes under that topic appears here the next time the site
+builds. Right now that build is still something I trigger. The obvious next step is to
+run it on a schedule so a Tuesday repo shows up here without me doing anything, and
+that automation is the piece I am working toward rather than something already wired
+up.
+
+The result I am after is a portfolio where the maintenance is structural, done once,
+instead of a recurring chore. The pipeline makes the work; the site reads it. My job
+is to keep both honest.

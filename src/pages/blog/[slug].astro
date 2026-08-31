@@ -1,0 +1,22 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Post from '../../layouts/Post.astro';
+
+export async function getStaticPaths() {
+  const entries = (await getCollection('blog')).filter((e) => !e.data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<Base title={`${entry.data.title} — Tobi-dev`} description={entry.data.summary}>
+  <Post data={entry.data}>
+    <Content />
+  </Post>
+</Base>

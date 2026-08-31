@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const posts = (await getCollection('blog'))
+  .filter((entry) => !entry.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<Base title="Blog — Tobi-dev" description="Notes on QA automation, AI tooling, and keeping a portfolio current.">
+  <section class="blog" aria-labelledby="blog-title">
+    <h1 id="blog-title">Blog</h1>
+    <ul class="blog__list">
+      {
+        posts.map((post) => (
+          <li class="blog__item">
+            <h2 class="blog__item-title">
+              <a href={`/blog/${post.id}`}>{post.data.title}</a>
+            </h2>
+            <p class="blog__item-date">
+              <time datetime={post.data.date.toISOString().slice(0, 10)}>{fmt(post.data.date)}</time>
+            </p>
+            <p class="blog__item-summary">{post.data.summary}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .blog {
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .blog__list {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .blog__item {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2rem;
+  }
+
+  .blog__item:last-child {
+    border-bottom: none;
+  }
+
+  .blog__item-title {
+    font-size: 1.4rem;
+    margin: 0;
+  }
+
+  .blog__item-date {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin: 0.35rem 0 0;
+  }
+
+  .blog__item-summary {
+    margin: 0.75rem 0 0;
+    max-width: 60ch;
+  }
+</style>

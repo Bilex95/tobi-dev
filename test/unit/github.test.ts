@@ -42,7 +42,7 @@ test('loadProjects falls back to cache on fetch failure', async () => {
   const projects = await loadProjects({
     fetchImpl: fetchImpl as unknown as typeof fetch,
     cachePath: 'test/fixtures/cache.sample.json',
-    overridesPath: 'src/content/projects/_overrides.json',
+    overridesPath: 'src/data/projects.overrides.json',
   });
   assert.ok(Array.isArray(projects));
   assert.equal(projects[0].slug, 'assertkit');
@@ -53,7 +53,7 @@ test('loadProjects falls back to cache on non-OK response', async () => {
   const projects = await loadProjects({
     fetchImpl: fetchImpl as unknown as typeof fetch,
     cachePath: 'test/fixtures/cache.sample.json',
-    overridesPath: 'src/content/projects/_overrides.json',
+    overridesPath: 'src/data/projects.overrides.json',
   });
   assert.equal(projects[0].slug, 'assertkit');
 });
@@ -63,7 +63,7 @@ test('loadProjects falls back to cache when no repos carry the portfolio topic y
   const projects = await loadProjects({
     fetchImpl: fetchImpl as unknown as typeof fetch,
     cachePath: 'test/fixtures/cache.sample.json',
-    overridesPath: 'src/content/projects/_overrides.json',
+    overridesPath: 'src/data/projects.overrides.json',
   });
   assert.equal(projects[0].slug, 'assertkit');
 });

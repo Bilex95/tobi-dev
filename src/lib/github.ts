@@ -56,7 +56,7 @@ export async function loadProjects(opts: {
 } = {}): Promise<Project[]> {
   const f = opts.fetchImpl ?? fetch;
   const cachePath = opts.cachePath ?? 'src/data/projects.cache.json';
-  const overridesPath = opts.overridesPath ?? 'src/content/projects/_overrides.json';
+  const overridesPath = opts.overridesPath ?? 'src/data/projects.overrides.json';
   const overrides: Overrides = JSON.parse(await readFile(overridesPath, 'utf8'));
   try {
     const res = await f(API, {

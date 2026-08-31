@@ -1,0 +1,9 @@
+.superpowers/
+node_modules/
+dist/
+.astro/
+coverage/
+.lighthouseci/
+playwright-report/
+test-results/
+*.local

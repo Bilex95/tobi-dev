@@ -1,0 +1,212 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { MarkdownHeading } from 'astro';
+import Prose from '../components/Prose.astro';
+
+interface Props {
+  data: CollectionEntry<'caseStudies'>['data'];
+  prev: CollectionEntry<'caseStudies'> | null;
+  next: CollectionEntry<'caseStudies'> | null;
+  headings: MarkdownHeading[];
+}
+
+const { data, prev, next, headings } = Astro.props;
+const sections = headings.filter((h) => h.depth === 2);
+---
+
+<article class="case-study">
+  <header class="case-study__head">
+    <h1>{data.title}</h1>
+    <p class="case-study__summary">{data.summary}</p>
+    <dl class="case-study__meta">
+      <div>
+        <dt>Role</dt>
+        <dd>{data.role}</dd>
+      </div>
+      <div>
+        <dt>Timeframe</dt>
+        <dd>{data.timeframe}</dd>
+      </div>
+      <div>
+        <dt>Repo</dt>
+        <dd><a href={data.repo}>{data.repo.replace(/^https:\/\//, '')}</a></dd>
+      </div>
+    </dl>
+    <ul class="case-study__stack" aria-label="Stack">
+      {data.stack.map((s) => <li>{s}</li>)}
+    </ul>
+  </header>
+
+  <div class="case-study__body">
+    {
+      sections.length > 0 && (
+        <nav class="case-study__toc" aria-label="Sections">
+          <p class="case-study__toc-label">On this page</p>
+          <ul>
+            {sections.map((h) => (
+              <li>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )
+    }
+
+    <div class="case-study__prose">
+      <Prose>
+        <slot />
+      </Prose>
+    </div>
+  </div>
+
+  <nav class="case-study__pager" aria-label="More case studies">
+    {
+      prev ? (
+        <a rel="prev" href={`/case-studies/${prev.data.slug}`}>
+          <span class="case-study__pager-dir">Previous</span>
+          <span class="case-study__pager-title">{prev.data.title}</span>
+        </a>
+      ) : (
+        <span />
+      )
+    }
+    {
+      next ? (
+        <a rel="next" href={`/case-studies/${next.data.slug}`}>
+          <span class="case-study__pager-dir">Next</span>
+          <span class="case-study__pager-title">{next.data.title}</span>
+        </a>
+      ) : (
+        <span />
+      )
+    }
+  </nav>
+</article>
+
+<style>
+  .case-study {
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .case-study__head {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .case-study__summary {
+    color: var(--muted);
+    font-size: 1.1rem;
+    max-width: 60ch;
+  }
+
+  .case-study__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin: 1.25rem 0 0;
+  }
+
+  .case-study__meta dt {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+
+  .case-study__meta dd {
+    margin: 0.15rem 0 0;
+  }
+
+  .case-study__stack {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 1.25rem 0 0;
+  }
+
+  .case-study__stack li {
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .case-study__body {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  .case-study__toc {
+    font-size: 0.9rem;
+  }
+
+  .case-study__toc-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 0.5rem;
+  }
+
+  .case-study__toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  @media (min-width: 60rem) {
+    .case-study__body {
+      grid-template-columns: 14rem 1fr;
+      align-items: start;
+    }
+
+    .case-study__toc {
+      position: sticky;
+      top: 5rem;
+    }
+  }
+
+  .case-study__pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .case-study__pager a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    text-decoration: none;
+    max-width: 45%;
+  }
+
+  .case-study__pager a:last-child {
+    text-align: right;
+    margin-left: auto;
+  }
+
+  .case-study__pager-dir {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+
+  .case-study__pager-title {
+    color: var(--accent);
+  }
+</style>

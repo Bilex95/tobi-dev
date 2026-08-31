@@ -1,0 +1,140 @@
+---
+/**
+ * AsciinemaPlayer — renders a terminal recording from a vendored copy of
+ * asciinema-player (public/vendor/asciinema/, Apache-2.0), loaded lazily on
+ * scroll. Cast files live in `src/assets/casts/*.cast`; `src` is the cast
+ * file name (e.g. "assertkit-demo.cast").
+ *
+ * v1 ships no cast files, so every instance currently renders the
+ * absent-cast fallback: a <figure> with a "recording coming soon" poster.
+ * The player branch is wired but untested against a real cast.
+ */
+interface Props {
+  src: string;
+  title: string;
+}
+
+const { src, title } = Astro.props;
+
+const casts = import.meta.glob('/src/assets/casts/*.cast', {
+  query: '?url',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
+
+const match = Object.entries(casts).find(([key]) => key.endsWith(`/${src}`));
+const castUrl = match?.[1] ?? null;
+const CSS_HREF = '/vendor/asciinema/asciinema-player.css';
+const JS_SRC = '/vendor/asciinema/asciinema-player.min.js';
+---
+
+{
+  castUrl ? (
+    <figure class="asciinema">
+      <div
+        class="asciinema__mount"
+        data-asciinema
+        data-cast={castUrl}
+        data-css={CSS_HREF}
+        data-js={JS_SRC}
+        role="img"
+        aria-label={`Terminal recording: ${title}`}
+      >
+        <noscript>
+          <a href={castUrl}>Download the terminal recording ({title})</a>
+        </noscript>
+      </div>
+      <figcaption>{title}</figcaption>
+    </figure>
+  ) : (
+    <figure class="asciinema asciinema--empty">
+      <div class="asciinema__poster" role="img" aria-label={`Terminal recording placeholder: ${title}`}>
+        <p class="asciinema__poster-line">▶ Recording coming soon</p>
+        <p class="asciinema__poster-title">{title}</p>
+      </div>
+      <figcaption>{title}</figcaption>
+    </figure>
+  )
+}
+
+{
+  castUrl && (
+    <script>
+      {`
+      (function () {
+        const mounts = document.querySelectorAll('[data-asciinema]');
+        if (!mounts.length) return;
+        let loaded = null;
+        function load(css, js) {
+          if (loaded) return loaded;
+          loaded = new Promise((resolve, reject) => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = css;
+            document.head.appendChild(link);
+            const s = document.createElement('script');
+            s.src = js;
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+          });
+          return loaded;
+        }
+        const io = new IntersectionObserver((entries, obs) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const el = entry.target;
+            obs.unobserve(el);
+            load(el.dataset.css, el.dataset.js)
+              .then(() => window.AsciinemaPlayer.create(el.dataset.cast, el))
+              .catch(() => {
+                el.textContent = 'Recording failed to load.';
+              });
+          });
+        }, { rootMargin: '200px' });
+        mounts.forEach((m) => io.observe(m));
+      })();
+      `}
+    </script>
+  )
+}
+
+<style>
+  .asciinema {
+    margin: 2rem 0;
+  }
+
+  .asciinema__mount {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .asciinema--empty .asciinema__poster {
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    background-color: var(--card);
+    padding: 2.5rem 1rem;
+    text-align: center;
+  }
+
+  .asciinema__poster-line {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--fg);
+  }
+
+  .asciinema__poster-title {
+    margin: 0.35rem 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  figcaption {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+</style>

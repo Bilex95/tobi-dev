@@ -1,0 +1,47 @@
+---
+/**
+ * Diagram — a <figure> wrapper for an inline SVG passed via <slot />.
+ * The figure is exposed to assistive tech as a single image labelled by
+ * `caption`; the visible <figcaption> repeats the caption for sighted users.
+ */
+interface Props {
+  caption: string;
+}
+
+const { caption } = Astro.props;
+---
+
+<figure class="diagram" role="img" aria-label={caption}>
+  <div class="diagram__canvas">
+    <slot />
+  </div>
+  <figcaption>{caption}</figcaption>
+</figure>
+
+<style>
+  .diagram {
+    margin: 2rem 0;
+  }
+
+  .diagram__canvas {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background-color: var(--card);
+    padding: 1rem;
+    overflow-x: auto;
+  }
+
+  .diagram__canvas :global(svg) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-inline: auto;
+  }
+
+  figcaption {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+</style>

@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import { loadProjects } from '../../lib/github.ts';
 import type { Project } from '../../lib/github.ts';
+import { formatDate } from '../../lib/format.ts';
 
 export async function getStaticPaths() {
   const projects = await loadProjects({ token: import.meta.env.GITHUB_TOKEN });
@@ -9,11 +10,7 @@ export async function getStaticPaths() {
 }
 
 const { project } = Astro.props as { project: Project };
-const updated = new Date(project.pushedAt).toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
+const updated = formatDate(new Date(project.pushedAt));
 const tags = project.topics.filter((t) => t !== 'portfolio');
 ---
 

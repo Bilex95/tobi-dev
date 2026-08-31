@@ -1,18 +1,15 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import Prose from '../components/Prose.astro';
+import { formatDate, isoDate } from '../lib/format.ts';
 
 interface Props {
   data: CollectionEntry<'blog'>['data'];
 }
 
 const { data } = Astro.props;
-const iso = data.date.toISOString().slice(0, 10);
-const formatted = data.date.toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
+const iso = isoDate(data.date);
+const formatted = formatDate(data.date);
 ---
 
 <article class="post">

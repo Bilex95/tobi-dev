@@ -1,0 +1,89 @@
+---
+import { existsSync } from 'node:fs';
+import Base from '../layouts/Base.astro';
+import { hasCv } from '../lib/cv.ts';
+
+const cv = hasCv(existsSync('public/cv/tobi-dev-qa.pdf'));
+
+const email = 'sammybilex@gmail.com';
+const github = 'https://github.com/Bilex95';
+const linkedin = 'https://www.linkedin.com/in/oluwatobiloba-bilewu';
+---
+
+<Base
+  title="About — Tobi-dev"
+  description="Tobi-dev: a QA-automation / SDET engineer who builds tooling to keep test suites trustworthy."
+>
+  <article class="about">
+    <h1>About</h1>
+    <p>
+      I'm a QA-automation / SDET engineer who builds tooling that keeps test
+      suites trustworthy. In <a href="/case-studies/assertkit">assertkit</a> I
+      wrote a Node CLI that turns acceptance criteria into review-ready Playwright
+      specs and classifies failing runs, so CI gates on real regressions instead
+      of flake. In <a href="/case-studies/craft-factory">craft-factory</a> I run a
+      scheduled GitHub Actions pipeline that publishes and refines a small public
+      project each week, so a portfolio grows on a cadence rather than on
+      motivation.
+    </p>
+
+    <section aria-labelledby="skills-heading">
+      <h2 id="skills-heading">Skills</h2>
+      <ul>
+        <li>Test automation: Playwright, end-to-end &amp; component testing</li>
+        <li>JavaScript, TypeScript, Node.js</li>
+        <li><code>node:test</code> as a runner</li>
+        <li>
+          CI/CD: GitHub Actions, test gating, Lighthouse performance budgets
+        </li>
+        <li>Testing non-deterministic LLM output</li>
+        <li>Anthropic SDK</li>
+      </ul>
+    </section>
+
+    {cv && (
+      <p><a href="/cv/tobi-dev-qa.pdf" download>Download CV (PDF)</a></p>
+    )}
+
+    <section aria-labelledby="contact-heading">
+      <h2 id="contact-heading">Contact</h2>
+      <ul>
+        <li><a href={`mailto:${email}`}>{email}</a></li>
+        <li><a href={github} rel="me">GitHub</a></li>
+        <li><a href={linkedin} rel="me">LinkedIn</a></li>
+      </ul>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .about {
+    max-width: 65ch;
+  }
+  .about h1 {
+    font-size: 2rem;
+    margin: 0 0 1rem;
+  }
+  .about section {
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .about h2 {
+    font-size: 1.5rem;
+    margin: 0 0 1rem;
+  }
+  .about ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+  .about li {
+    margin: 0.35rem 0;
+  }
+  .about code {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.05rem 0.35rem;
+    font-size: 0.9em;
+  }
+</style>

@@ -1,0 +1,46 @@
+{
+  "name": "tobi-dev",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview --port 4321",
+    "check": "astro check",
+    "test": "c8 --reporter=text --reporter=lcov node --import tsx --test 'test/unit/**/*.test.ts' 'test/component/**/*.test.ts' 'test/content/**/*.test.ts'",
+    "test:build": "node --import tsx --test 'test/build/**/*.test.ts'",
+    "test:e2e": "playwright test",
+    "test:xbrowser": "playwright test -c playwright.cross-browser.config.ts",
+    "test:links": "linkinator ./dist --recurse --skip \"^https?://\"",
+    "test:html": "html-validate 'dist/**/*.html'",
+    "test:lh": "lhci autorun",
+    "test:ci": "npm run build && npm run test:build && npm run test:html && npm run test:links && npm run test:lh",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.14",
+    "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/tailwind": "^6.0.2",
+    "astro": "^5.18.2",
+    "astro-og-canvas": "^0.13.0"
+  },
+  "overrides": {
+    "rollup": "npm:@rollup/wasm-node@^4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.4.0",
+    "c8": "^12.0.0",
+    "html-validate": "^11.11.0",
+    "linkinator": "^8.1.0",
+    "tailwindcss": "^3.4.19",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3"
+  }
+}

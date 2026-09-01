@@ -61,34 +61,28 @@ gh secret set VERCEL_DEPLOY_HOOK --repo Bilex95/tobi-dev
 The `Refresh projects cache` workflow's final step POSTs to this hook only when
 the secret is present; without it that step is a harmless no-op.
 
-## 4. Branch protection (R12)
+## 4. Branch protection
 
-On `Bilex95/tobi-dev` → **Settings → Branches → Add branch ruleset** (or classic
-branch protection) for `main`:
+**Already configured** on `main` (via `gh api`, 2026-09-01):
 
-- Require a pull request before merging.
-- **Require status checks to pass before merging**, and select these four checks
-  from `.github/workflows/ci.yml`:
-  - `unit`
-  - `e2e`
-  - `quality`
-  - `hygiene`
+- Required status checks before a **PR** can merge: `unit`, `e2e`, `quality`,
+  `hygiene`. `visual` is intentionally not required — it is advisory
+  (`continue-on-error`) until Linux screenshot baselines land (see punch list).
+- Force-pushes and branch deletion on `main` are blocked.
+- No "require a pull request" rule, and `enforce_admins: false` — so direct
+  pushes to `main` still work for the owner **and** for
+  `.github/workflows/rebuild.yml`'s weekly cache-refresh commit. That is why no
+  Actions-bot bypass is needed.
 
-Leave `visual` unchecked — it is advisory (`continue-on-error`) until Linux
-screenshot baselines are committed (see punch list).
+Inspect or change it:
 
-**Add an Actions-bot bypass — required, do this before the first refresh (§7).**
-`.github/workflows/rebuild.yml` does `git commit` + `git push` straight to `main`
-using the built-in `GITHUB_TOKEN`. With "require a pull request" enabled and no
-bypass, that push is rejected and **every** weekly run (and the first
-`workflow_dispatch`) fails at the push step. In the `main` ruleset →
-**Bypass list** → **Add bypass** → add **`Repository admin`** *and* the
-**`github-actions` app** (select role/actor "GitHub Actions"). Save.
+```bash
+gh api repos/Bilex95/tobi-dev/branches/main/protection
+```
 
-- Alternative (only if you refuse to grant a bypass): rework `rebuild.yml` so the
-  cache-refresh step opens a PR (`peter-evans/create-pull-request` or
-  `gh pr create`) instead of pushing — then you must also merge that PR each week.
-  The bypass entry is the recommended path.
+To make it stricter (a PR for every change), add "Require a pull request before
+merging" in Settings → Branches — but then also add a bypass for the
+`github-actions` actor, or the weekly refresh push to `main` gets rejected.
 
 ## 5. Tag repos
 

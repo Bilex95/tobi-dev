@@ -152,7 +152,7 @@ PROD_URL=https://<the real url> npx playwright test --config playwright.prod.con
 ```
 
 It asserts: home returns 200 over HTTPS with a canonical pointing at the real
-host, and that `/og/default.png` and `/robots.txt` load.
+host, and that `/og/default.png` and `/favicon.svg` load.
 
 ## 9. Wire the link out
 
@@ -170,4 +170,4 @@ host, and that `/og/default.png` and `/robots.txt` load.
 - **Lighthouse CI**: `test:lh` is a blocking `quality` step; it can't run on Windows locally (chrome-launcher EPERM) but works on Ubuntu. If the first CI run shows Lighthouse score flakiness, move that step to `continue-on-error`.
 - **Visual regression**: `e2e/visual.spec.ts` baselines are `-chromium-win32`. On the first CI run the `visual` job (already `continue-on-error`) will report missing Linux baselines — download the run's artifact or run `npx playwright test e2e/visual.spec.ts --update-snapshots` on Linux, commit the `-linux` PNGs, then promote the `visual` job to a blocking check.
 - **craft-factory `_overrides.json`**: add `blurb`/`featured` entries for new repos as they appear so the gallery reads well.
-- **favicon**: this project ships none. `e2e/production.spec.ts` checks `/robots.txt` instead. Add `public/favicon.svg` + a `<link rel="icon">` in `src/layouts/Base.astro` when convenient, then add a favicon assertion back to the production smoke.
+- **favicon**: the favicon is a plain placeholder monogram (`public/favicon.svg` — a blue rounded square with white "tb", linked from `src/layouts/Base.astro`). Swap the file if you want a custom mark; the production smoke asserts `/favicon.svg` loads, so keep that path.

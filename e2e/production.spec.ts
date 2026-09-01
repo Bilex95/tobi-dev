@@ -22,10 +22,9 @@ test('production home responds 200 over HTTPS with the right canonical', async (
   );
 });
 
-test('production OG image and robots.txt load', async ({ request }) => {
-  // This project ships no favicon (nothing under public/ or src/ references one —
-  // see docs/deploy.md punch list). robots.txt is the stand-in static-asset
-  // liveness check alongside the Task 10 OG image.
+test('production OG image and favicon load', async ({ request }) => {
+  // Static-asset liveness check: the Task 10 OG image and the site favicon
+  // (public/favicon.svg, linked from src/layouts/Base.astro) both resolve.
   expect((await request.get(`${BASE}/og/default.png`)).ok()).toBeTruthy();
-  expect((await request.get(`${BASE}/robots.txt`)).ok()).toBeTruthy();
+  expect((await request.get(`${BASE}/favicon.svg`)).ok()).toBeTruthy();
 });

@@ -2,7 +2,9 @@ import { test, expect } from '@playwright/test';
 
 /**
  * Visual-regression baselines. This file is deliberately kept on its own so CI
- * (Task 13) can run it as a NON-BLOCKING job:  `playwright test visual.spec.ts`.
+ * (Task 13) can run it as a NON-BLOCKING job:  `playwright test e2e/visual.spec.ts`.
+ * Every test title is tagged `@visual` so the blocking `e2e` CI job can exclude
+ * them with `--grep-invert @visual` while this filename still runs them all.
  * Locally the baselines under `e2e/visual.spec.ts-snapshots/` are generated and
  * committed, so a clean second run matches and the suite stays green.
  */
@@ -18,7 +20,7 @@ for (const route of routes) {
   for (const theme of themes) {
     for (const vp of viewports) {
       const slug = route === '/' ? 'home' : route.replace(/^\//, '').replace(/\//g, '-');
-      test(`${slug} — ${theme} — ${vp.name}`, async ({ page }) => {
+      test(`${slug} — ${theme} — ${vp.name} @visual`, async ({ page }) => {
         await page.addInitScript((t) => {
           try {
             localStorage.setItem('tobi-theme', t as string);

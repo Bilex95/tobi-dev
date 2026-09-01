@@ -1,15 +1,108 @@
+# CI pipeline for tobi-dev (Astro 5 static site).
+#
+# Intended REQUIRED status checks (enforced via branch protection on `main` —
+# the "mark as required" step is documented in docs/deploy.md, Task 14, since
+# there is no remote yet — R12):
+#   - unit
+#   - e2e
+#   - quality
+#   - hygiene
+#
+# The `visual` job is ADVISORY (continue-on-error): the committed screenshot
+# baselines are `-win32` and will not match Linux runners. Once Linux baselines
+# are committed, promote `visual` to a required check.
 name: CI
+
 on:
-  push: { branches: [main] }
-  pull_request: { branches: [main] }
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
 jobs:
-  build-test:
+  unit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
+        with:
+          node-version: 22
+          cache: npm
       - run: npm ci
       - run: npm run check
-      - run: npm run build
       - run: npm test
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # `@visual` specs are excluded here and run (advisory) in the `visual`
+      # job — the committed `-win32` baselines will not match Linux runners.
+      - run: npm run test:e2e -- --grep-invert @visual
+
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:build
+      - run: npm run test:html
+      - run: npm run test:links
+      - run: npm run test:lh
+
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # R22 — `npm audit` is ADVISORY, never a blocking gate. The pre-existing
+      # high advisories are all dev-only or build-time-only on a static site.
+      # The step never fails the workflow; the summary is written to the job page.
+      - name: npm audit (advisory)
+        continue-on-error: true
+        run: |
+          {
+            echo '## npm audit (advisory — non-blocking, R22)'
+            echo ''
+            echo '```'
+            npm run test:audit 2>&1 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      # gitleaks-action is free for public repos and personal accounts; the
+      # GITLEAKS_LICENSE env var is only needed for GitHub Organisation accounts,
+      # so it is intentionally omitted here.
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+
+  visual:
+    runs-on: ubuntu-latest
+    # ADVISORY until Linux screenshot baselines are committed. The baselines in
+    # the repo are `-win32`; a diff here does not fail CI. Commit Linux baselines
+    # once, then promote this job to a required check.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test e2e/visual.spec.ts

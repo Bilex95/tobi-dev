@@ -88,8 +88,20 @@ jobs:
       # gitleaks-action is free for public repos and personal accounts; the
       # GITLEAKS_LICENSE env var is only needed for GitHub Organisation accounts,
       # so it is intentionally omitted here.
+      #
+      # GITHUB_TOKEN is NOT optional though: the action calls the API to classify
+      # the account (personal vs organisation) *before* deciding a licence is not
+      # required. Without a token that lookup is unauthenticated and 403s on the
+      # shared runner IPs, and the action then exits 1 with "missing gitleaks
+      # license". Passing the default token makes the classification succeed.
+      #
+      # TODO(post-launch): move to gitleaks-action@v3 — v2 runs on the Node 20
+      # runtime, which GitHub retires ~2026-09-16.
       - name: gitleaks
         uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
 
   visual:
     runs-on: ubuntu-latest

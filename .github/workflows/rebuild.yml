@@ -20,6 +20,11 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    # DEPLOY_HOOK must be job-level, not step-level: a step's `if:` is evaluated
+    # BEFORE that step's own `env:` block is applied, so a step-scoped var is
+    # always empty in its own condition and the step would never run.
+    env:
+      DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -39,8 +44,8 @@ jobs:
             git commit -m "chore: refresh projects cache"
             git push
           fi
+      # No `|| echo` fallback: the `if` already covers the absent-secret case,
+      # and swallowing curl's exit code would hide a real hook failure.
       - name: Trigger redeploy
         if: ${{ env.DEPLOY_HOOK != '' }}
-        env:
-          DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
-        run: curl -fsS -X POST "$DEPLOY_HOOK" || echo "no deploy hook configured"
+        run: curl -fsS -X POST "$DEPLOY_HOOK"

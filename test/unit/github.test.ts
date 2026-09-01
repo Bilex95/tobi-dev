@@ -67,3 +67,34 @@ test('loadProjects falls back to cache when no repos carry the portfolio topic y
   });
   assert.equal(projects[0].slug, 'assertkit');
 });
+
+test('loadProjects memoizes bare calls so a build makes one API call, not three', async () => {
+  // Stub the global so this never touches the network; the cache fallback path
+  // is what resolves. The three pages that call loadProjects() pass no test
+  // seams, so this is exactly the code path a build takes.
+  const original = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    throw new Error('offline in test');
+  }) as unknown as typeof fetch;
+  try {
+    const first = loadProjects();
+    const second = loadProjects();
+    assert.equal(first, second, 'bare calls should share one promise');
+    assert.equal(await first, await second, 'and therefore one array instance');
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+test('loadProjects with test seams bypasses the memo', async () => {
+  const fetchImpl = async () => { throw new Error('network down'); };
+  const opts = {
+    fetchImpl: fetchImpl as unknown as typeof fetch,
+    cachePath: 'test/fixtures/cache.sample.json',
+    overridesPath: 'src/data/projects.overrides.json',
+  };
+  const a = await loadProjects(opts);
+  const b = await loadProjects(opts);
+  assert.notEqual(a, b, 'seamed calls must not be memoized');
+  assert.deepEqual(a.map((p) => p.slug), b.map((p) => p.slug));
+});

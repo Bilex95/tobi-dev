@@ -50,10 +50,32 @@ export function applyOverrides(projects: Project[], o: Overrides): Project[] {
   });
 }
 
-export async function loadProjects(opts: {
+export type LoadOpts = {
   fetchImpl?: typeof fetch; token?: string;
   cachePath?: string; overridesPath?: string;
-} = {}): Promise<Project[]> {
+};
+
+let _projects: Promise<Project[]> | null = null;
+
+/**
+ * Build-time project loader, memoized at module scope.
+ *
+ * Three pages call this (`/`, `/work`, `/work/[slug]`). Without the memo that is
+ * three GitHub API calls per build against a 60/hr unauthenticated limit, and —
+ * worse — the calls can *disagree*: one succeeds live while a later one is rate
+ * limited into the cache, so a featured card on the home page can link to a
+ * `/work/<slug>` that `getStaticPaths` never generated. One shared promise makes
+ * every page render from the same snapshot.
+ *
+ * Calls that pass test seams (`fetchImpl` / `cachePath` / `overridesPath`)
+ * bypass the memo entirely, so unit tests stay independent of each other.
+ */
+export function loadProjects(opts: LoadOpts = {}): Promise<Project[]> {
+  if (opts.fetchImpl || opts.cachePath || opts.overridesPath) return _loadProjects(opts);
+  return (_projects ??= _loadProjects(opts));
+}
+
+async function _loadProjects(opts: LoadOpts = {}): Promise<Project[]> {
   const f = opts.fetchImpl ?? fetch;
   const cachePath = opts.cachePath ?? 'src/data/projects.cache.json';
   const overridesPath = opts.overridesPath ?? 'src/data/projects.overrides.json';

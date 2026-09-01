@@ -1,0 +1,46 @@
+# Weekly refresh of src/data/projects.cache.json from the live GitHub API.
+#
+# Runs ~15 min after craft-factory's Tuesday publish so any newly published /
+# newly `portfolio`-tagged repo is picked up on the same day. Also runnable on
+# demand via workflow_dispatch (used for the first populate — see docs/deploy.md).
+#
+# The refresh script (scripts/refresh-projects.mjs, ruling R23) writes a neutral
+# snapshot only; if nothing changed, or the API errored, or no repo is tagged
+# `portfolio`, the file is left untouched and this job is a no-op.
+name: Refresh projects cache
+
+on:
+  schedule:
+    - cron: '20 11 * * 2' # ~15 min after craft-factory's Tuesday run
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node --import tsx scripts/refresh-projects.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit cache if changed
+        run: |
+          if ! git diff --quiet -- src/data/projects.cache.json; then
+            git config user.name "tobi-dev-bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add src/data/projects.cache.json
+            git commit -m "chore: refresh projects cache"
+            git push
+          fi
+      - name: Trigger redeploy
+        if: ${{ env.DEPLOY_HOOK != '' }}
+        env:
+          DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: curl -fsS -X POST "$DEPLOY_HOOK" || echo "no deploy hook configured"

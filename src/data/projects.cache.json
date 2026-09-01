@@ -1,34 +1,47 @@
 [
   {
-    "slug": "assertkit",
-    "name": "assertkit",
-    "description": "AI-assisted Playwright spec generation and failure triage for CI gating.",
-    "url": "https://github.com/Bilex95/assertkit",
+    "slug": "tobi-dev",
+    "name": "tobi-dev",
+    "description": "QA-automation + AI engineer portfolio — static Astro site",
+    "url": "https://github.com/Bilex95/tobi-dev",
     "homepage": null,
     "topics": [
-      "portfolio",
-      "qa",
-      "playwright",
-      "ai"
+      "portfolio"
     ],
-    "language": "JavaScript",
+    "language": "TypeScript",
     "stars": 0,
-    "pushedAt": "2026-08-31T00:00:00Z"
+    "pushedAt": "2026-09-01T12:45:49Z"
   },
   {
     "slug": "craft-factory",
     "name": "craft-factory",
-    "description": "A GitHub Actions pipeline that publishes a portfolio repo on a schedule.",
+    "description": "",
     "url": "https://github.com/Bilex95/craft-factory",
     "homepage": null,
     "topics": [
-      "portfolio",
-      "automation",
-      "ci",
-      "github-actions"
+      "portfolio"
     ],
     "language": "JavaScript",
     "stars": 0,
-    "pushedAt": "2026-08-24T00:00:00Z"
+    "pushedAt": "2026-08-31T19:18:16Z"
+  },
+  {
+    "slug": "assertkit",
+    "name": "assertkit",
+    "description": "AI-assisted QA toolkit: draft Playwright tests from a spec, triage test failures with an LLM. Human reviews and owns the result.",
+    "url": "https://github.com/Bilex95/assertkit",
+    "homepage": null,
+    "topics": [
+      "ai",
+      "llm",
+      "playwright",
+      "portfolio",
+      "qa",
+      "test-automation",
+      "testing"
+    ],
+    "language": "JavaScript",
+    "stars": 0,
+    "pushedAt": "2026-08-31T19:17:42Z"
   }
 ]

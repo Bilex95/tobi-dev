@@ -5,7 +5,7 @@
  * `.astro` frontmatter at build time and from `node:test` units.
  */
 
-export const SITE = 'https://tobi-dev.vercel.app';
+export const SITE = 'https://bilex-dev.vercel.app';
 
 const GITHUB_URL = 'https://github.com/Bilex95';
 const LINKEDIN_URL = 'https://www.linkedin.com/in/oluwatobiloba-bilewu';

@@ -2,6 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
+import { SITE } from '../../src/lib/seo.ts';
+
+const SITE_RE = SITE.replace(/[.]/g, '\\.');
 
 async function htmlFiles(dir: string, acc: string[] = []): Promise<string[]> {
   for (const e of await readdir(dir, { withFileTypes: true })) {
@@ -31,7 +34,7 @@ test('every page has a unique non-empty <title>, a canonical link, and og:image'
     } else {
       assert.match(
         html,
-        /<link rel="canonical" href="https:\/\/tobi-dev\.vercel\.app/,
+        new RegExp(`<link rel="canonical" href="${SITE_RE}`),
         `${f} missing canonical`,
       );
     }
@@ -45,7 +48,7 @@ test('home page embeds valid Person JSON-LD', async () => {
   assert.ok(m, 'no JSON-LD block');
   const parsed = JSON.parse(m![1]);
   assert.equal(parsed['@type'], 'Person');
-  assert.equal(parsed.url, 'https://tobi-dev.vercel.app');
+  assert.equal(parsed.url, SITE);
 });
 
 test('a blog post embeds Article JSON-LD with datePublished', async () => {
@@ -59,7 +62,7 @@ test('a blog post embeds Article JSON-LD with datePublished', async () => {
 
 test('robots.txt and sitemap-index.xml exist', async () => {
   const robots = await readFile('dist/robots.txt', 'utf8');
-  assert.match(robots, /Sitemap: https:\/\/tobi-dev\.vercel\.app\/sitemap-index\.xml/);
+  assert.match(robots, new RegExp(`Sitemap: ${SITE_RE}/sitemap-index\\.xml`));
   const idx = await readFile('dist/sitemap-index.xml', 'utf8');
   assert.match(idx, /sitemap/);
 });

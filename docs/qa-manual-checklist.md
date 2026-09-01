@@ -15,7 +15,7 @@ Run the whole list before the first launch. Before later deploys, run at least
 
 - Preview the production build locally first: `npm run build && npm run preview`
   (serves `http://localhost:4321`).
-- "Prod URL" below means `https://tobi-dev.vercel.app` (or the live URL from
+- "Prod URL" below means `https://bilex-dev.vercel.app` (or the live URL from
   `docs/deploy.md` §2 if it differs).
 
 ---
@@ -137,7 +137,7 @@ automatically, but eyeball it once before the first launch.
 - [ ] Open `/` in **Firefox**. Expected: layout matches Chrome; theme toggle and
       the `/work` tag filter work; no console errors.
 - [ ] Open `/` in **Safari** (macOS) or a **WebKit** build
-      (`npx playwright open --browser=webkit https://tobi-dev.vercel.app`).
+      (`npx playwright open --browser=webkit https://bilex-dev.vercel.app`).
       Expected: same — fonts, spacing, focus rings, and both interactive widgets
       behave.
 - [ ] Spot-check `/work` and one case study in whichever of the two you have

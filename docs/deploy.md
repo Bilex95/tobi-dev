@@ -37,13 +37,15 @@ bypass or the weekly refresh push will be rejected.)
 2. Framework preset auto-detects as **Astro**. Leave build command
    (`astro build`) and output directory (`dist`) at their defaults.
 3. Deploy. Note the assigned `*.vercel.app` URL.
-4. If the URL is **not** `https://tobi-dev.vercel.app`, either:
-   - rename the Vercel project (Settings → General → Project Name) so the domain
-     becomes `tobi-dev.vercel.app`, **or**
-   - update the hard-coded site URL in three places and redeploy:
-     - `site:` in `astro.config.mjs`
-     - `SITE` in `src/lib/seo.ts`
-     - `BASE` default in `e2e/production.spec.ts`
+4. **Production domain is `https://bilex-dev.vercel.app`** — claim it under
+   Settings → Domains (`tobi-dev.vercel.app` was already taken by an unrelated
+   account). If you ever move to a different domain, update the hard-coded site
+   URL in these four places and redeploy:
+   - `site:` in `astro.config.mjs`
+   - `SITE` in `src/lib/seo.ts`
+   - `Sitemap:` line in `public/robots.txt`
+   - `BASE` default in `e2e/production.spec.ts`
+   (plus the `parsed.url` assertion in `test/build/metadata.test.ts`).
 
 ## 3. Deploy hook
 

@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test';
  *
  * See docs/deploy.md step 8.
  */
-const BASE = process.env.PROD_URL ?? 'https://tobi-dev.vercel.app';
+const BASE = process.env.PROD_URL ?? 'https://bilex-dev.vercel.app';
 
 test('production home responds 200 over HTTPS with the right canonical', async ({ page }) => {
   const res = await page.goto(BASE, { waitUntil: 'domcontentloaded' });

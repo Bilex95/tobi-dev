@@ -6,7 +6,7 @@ engineer. It presents two lead projects as full case studies (`assertkit`,
 blog, and an about/CV/contact page. The site ships near-zero client JS, supports
 light/dark, carries per-page SEO metadata (OpenGraph, sitemap, `robots.txt`,
 JSON-LD), and is built with its QA suite as a first-class part of the repo. It
-deploys to <https://tobi-dev.vercel.app>.
+deploys to <https://bilex-dev.vercel.app>.
 
 ## Local development
 

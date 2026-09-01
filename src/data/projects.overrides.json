@@ -1,8 +1,17 @@
 {
-  "featured": ["assertkit", "craft-factory"],
-  "hide": [],
+  "featured": [
+    "assertkit",
+    "craft-factory"
+  ],
+  "hide": [
+    "tobi-dev"
+  ],
   "entries": {
-    "assertkit": { "blurb": "AI-assisted Playwright spec generation + failure triage for CI gating." },
-    "craft-factory": { "blurb": "A GitHub Actions pipeline that publishes a portfolio repo on a schedule." }
+    "assertkit": {
+      "blurb": "AI-assisted Playwright spec generation + failure triage for CI gating."
+    },
+    "craft-factory": {
+      "blurb": "A GitHub Actions pipeline that publishes a portfolio repo on a schedule."
+    }
   }
 }

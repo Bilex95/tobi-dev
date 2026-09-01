@@ -10,9 +10,17 @@ interface Props {
   path?: string;
   image?: string;
   jsonLd?: object;
+  noindex?: boolean;
 }
 
-const { title, description, path = Astro.url.pathname, image, jsonLd } = Astro.props;
+const {
+  title,
+  description,
+  path = Astro.url.pathname,
+  image,
+  jsonLd,
+  noindex = false,
+} = Astro.props;
 const meta = buildMeta({ title, description, path, image });
 ---
 
@@ -41,8 +49,17 @@ const meta = buildMeta({ title, description, path, image });
         ),
       )
     }
-    <link rel="canonical" href={meta.canonical} />
-    {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    {noindex && <meta name="robots" content="noindex" />}
+    {!noindex && <link rel="canonical" href={meta.canonical} />}
+    {
+      jsonLd && (
+        <script
+          is:inline
+          type="application/ld+json"
+          set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')}
+        />
+      )
+    }
   </head>
   <body>
     <a href="#main" class="skip-link">Skip to content</a>

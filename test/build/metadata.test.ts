@@ -22,11 +22,19 @@ test('every page has a unique non-empty <title>, a canonical link, and og:image'
     assert.ok(title, `${f} has no <title>`);
     assert.ok(!titles.has(title), `duplicate title ${JSON.stringify(title)} in ${f} and ${titles.get(title)}`);
     titles.set(title, f);
-    assert.match(
-      html,
-      /<link rel="canonical" href="https:\/\/tobi-dev\.vercel\.app/,
-      `${f} missing canonical`,
-    );
+
+    // The 404 page is intentionally noindex: no canonical, an explicit robots
+    // meta instead. Every other page must still carry a canonical.
+    if (f.replace(/\\/g, '/').endsWith('/404.html')) {
+      assert.match(html, /<meta name="robots" content="noindex">/, `${f} missing noindex`);
+      assert.doesNotMatch(html, /rel="canonical"/, `${f} should not emit canonical`);
+    } else {
+      assert.match(
+        html,
+        /<link rel="canonical" href="https:\/\/tobi-dev\.vercel\.app/,
+        `${f} missing canonical`,
+      );
+    }
     assert.match(html, /property="og:image"/, `${f} missing og:image`);
   }
 });

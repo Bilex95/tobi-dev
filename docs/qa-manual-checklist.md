@@ -42,9 +42,9 @@ Unplug / ignore the mouse. Use **Tab** / **Shift+Tab** to move, **Enter** /
       Expected: the full list returns; no focus loss.
 - [ ] **One case study (`/case-studies/assertkit`) — no keyboard trap.** Tab from
       the top of the page all the way through to the footer, then **Shift+Tab**
-      back. Expected: you can enter and leave every widget (including the
-      asciinema player, if focusable) and reach the browser chrome — nothing
-      captures focus permanently.
+      back. Expected: you can enter and leave every interactive element (the
+      in-page section nav, prev/next links) and reach the browser chrome —
+      nothing captures focus permanently.
 - [ ] **Prev/next links.** On the case study, Tab to the prev/next case-study
       links and activate one with **Enter**. Expected: navigation happens; the
       next page's focus starts at a sensible place.
@@ -66,15 +66,13 @@ Windows: **NVDA** (Firefox or Chrome). macOS: **VoiceOver** (`Cmd+F5`, Safari).
       list; VoiceOver rotor). Expected: exactly one `h1`; `h2`/`h3` nest without
       skipping levels; the outline reads as a sensible table of contents.
 - [ ] **`/case-studies/assertkit` — heading outline.** Same. Expected: one `h1`
-      (the case-study title); section headings (`Problem`, `Approach`, `Outcome`,
-      …) are `h2` and in order.
+      (the case-study title); the six section headings (`Context`, `Problem`,
+      `What I built`, `Key decisions & tradeoffs`, `Verification`,
+      `Results & what's next`) are `h2` and in order.
 - [ ] **Images & diagrams announce meaningful text.** Arrow through the case
       study. Expected: every screenshot / architecture diagram announces a
       description of what it shows (not "image", not a filename, not empty);
       decorative images are skipped (empty `alt`).
-- [ ] **Asciinema cast.** Expected: the player has an accessible name; if it
-      can't be made useful to a screen reader, a text summary of the cast is
-      nearby.
 - [ ] **Theme toggle announces its state.** Focus the toggle. Expected: it
       announces a name **and** current state (e.g. "Switch to light theme,
       button" or a pressed/`aria-pressed` state that flips when toggled) — not

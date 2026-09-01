@@ -221,9 +221,9 @@ the second question has a stable answer. I wrote the pattern up in
 `docs/testing-ai-output.md` because it was the part I had to reason hardest about,
 and it generalises past this repo.
 
-**Mocked client for units, real client for a small e2e slice.** All 30 `node:test`
-unit tests mock `@anthropic-ai/sdk`, so they run in milliseconds, offline, and for
-free. The four tests that exercise a live model are e2e and **skip** when
+**Mocked client for units, real client for a small e2e slice.** The `node:test`
+unit suite mocks `@anthropic-ai/sdk`, so it runs in milliseconds, offline, and for
+free. The handful of tests that exercise a live model are e2e and **skip** when
 `ANTHROPIC_API_KEY` is absent rather than failing. That keeps a fork's CI green
 without secrets, at the cost of a suite whose meaning depends on the environment:
 a green run is only fully green if you check *how many* tests actually ran. I
@@ -242,18 +242,17 @@ Everything below was run against a clean clone in August 2026.
 - **`npm ci` from a clean checkout: clean.** `package-lock.json` is committed and
   CI uses `npm ci`, not `npm install`, so the lockfile is actually load-bearing
   rather than decorative.
-- **Unit tests: 30/30 passing** under `node:test`, with the Anthropic client
-  mocked. No network, no key, no cost.
-- **End-to-end: 10 passed, 4 skipped.** The four skips are the live-model
-  AI-output tests; they run when `ANTHROPIC_API_KEY` is present in the
-  environment.
+- **Unit suite: green** under `node:test`, with the Anthropic client mocked. No
+  network, no key, no cost.
+- **End-to-end: passing, with the AI-output specs skipped.** Those specs exercise
+  a live model and run only when `ANTHROPIC_API_KEY` is present; without it they
+  skip rather than fail.
 - **A real bug found by the suite, not by me.** The baseline filter test in the
   demo app hit a Playwright strict-mode violation — my locator resolved to more
   than one element, so the test was asserting against whichever node happened to
-  come first. Fixed in commit `6d667bf` by tightening the locator to a single
-  match. It is a small fix and I am including it deliberately: the test was
-  wrong in a way that still went green locally, which is the failure mode this
-  whole project is about.
+  come first. I fixed it by tightening the locator to a single match. It is a
+  small fix and I am including it deliberately: the test was wrong in a way that
+  still went green locally, which is the failure mode this whole project is about.
 - **Design rationale is written down** in `docs/DESIGN.md`, alongside
   `docs/testing-ai-output.md`. If someone disagrees with the four-bucket
   taxonomy, the argument they need to attack is on the page.

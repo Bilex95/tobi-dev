@@ -29,11 +29,11 @@ Full test plan: `docs/superpowers/specs/2026-08-31-qa-ai-portfolio-site-design.m
 
 | Command | Covers |
 |---|---|
-| `npm test` | Unit + component + content (`node:test`, coverage via `c8`): `github.ts` repo normalize / `portfolio`-topic filter / override merge / cache fallback, `seo.ts` meta + JSON-LD, theme logic; `ProjectCard` / `Nav` / `TagFilter` render via the Astro Container API; content contract over `getCollection()`. |
-| `npm run test:build` | Structural SEO / metadata assertions parsing the built `dist/` HTML: unique title + description + canonical + OG image per page, `sitemap.xml` covers all routes, `robots.txt` present, JSON-LD parses. |
-| `npm run test:e2e` | Playwright (Chromium): functional flows (nav, theme persists across reload, gallery filter filters + is keyboard-operable, case-study prev/next, CV link shown only when the file exists, 404), the `@axe-core/playwright` accessibility scan on every route, and responsive checks (320–1440, no horizontal scroll, tap targets ≥ 44px). Excludes `@visual` and `production.spec.ts`. |
-| `npm run test:html` | `html-validate` over `dist/**/*.html`: valid markup, one `<h1>` per page, landmark structure. |
-| `npm run test:links` | `linkinator` over `dist/` — internal link integrity, no broken links or missing anchors. |
+| `npm test` | Unit + component + content (`node:test`, coverage via `c8`): `github.ts` repo normalize / `portfolio`-topic filter / override merge / cache fallback / memoization, `seo.ts` meta + JSON-LD, `format.ts`, theme logic; `ProjectCard` and `TagFilter` render via the Astro Container API; content-collection contract — required frontmatter keys and unique `order` — by reading the `.mdx` files. |
+| `npm run test:build` | SEO / metadata assertions parsing the built `dist/` HTML: every page has a unique non-empty `<title>`, a canonical link, and an `og:image`; the home page embeds valid `Person` JSON-LD; `robots.txt` and `sitemap-index.xml` exist; `/404` is `noindex` with no canonical. |
+| `npm run test:e2e` | Playwright (Chromium): functional flows (nav, theme persists across reload, gallery filter filters + is keyboard-operable, case-study prev/next, CV link shown only when the file exists, 404), the `@axe-core/playwright` scan (`wcag2a`/`wcag2aa`, 0 serious/critical) on every route, and responsive checks (320–1440, no horizontal scroll, nav tap targets ≥ 44px). `production.spec.ts` is excluded by config; CI also passes `--grep-invert @visual`, so the bare script additionally runs the visual specs against the committed per-platform baselines. |
+| `npm run test:html` | `html-validate:recommended` + `heading-level` + `no-missing-references` over `dist/**/*.html`. |
+| `npm run test:links` | `scripts/check-links.mjs` — `linkinator` crawls the built site's internal links (external URLs skipped); fails on a broken link or if it scans fewer than 10 (a guard against a silently-empty crawl). |
 | `npm run test:lh` | Lighthouse CI (`lhci autorun`) on `/` + one case study — perf ≥ 95, a11y = 100, JS-weight budget. **CI / Linux only** (`chrome-launcher` throws EPERM on Windows). |
 | `npm run test:audit` | `npm audit --audit-level=high` — **advisory**, expected to exit non-zero (pre-existing high advisories in the dev/build chain; tracked in `docs/deploy.md` §10). |
 

@@ -6,9 +6,16 @@ test('gallery lists projects and the tag filter narrows them by keyboard', async
   await expect(cards.first()).toBeVisible();
   const count = await cards.count();
   expect(count).toBeGreaterThan(0);
-  await page.getByRole('button', { name: 'qa' }).press('Enter');
+
+  // Don't hardcode a tag name — the tag set is live GitHub data once repos are
+  // `portfolio`-tagged. Take the first real filter button (not "All") and assert
+  // it narrows the grid to exactly the cards carrying that tag.
+  const firstTag = page.locator('.tag-filter button[data-tag]:not([data-tag="*"])').first();
+  const tag = await firstTag.getAttribute('data-tag');
+  expect(tag).toBeTruthy();
+  await firstTag.press('Enter');
   await expect(page.locator('[data-project]:not([hidden])')).toHaveCount(
-    await page.locator('[data-project][data-tags~="qa"]').count(),
+    await page.locator(`[data-project][data-tags~="${tag}"]`).count(),
   );
 });
 

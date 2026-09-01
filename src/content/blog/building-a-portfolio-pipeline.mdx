@@ -33,10 +33,11 @@ repos over a three-month, one-per-week run.
 This site is the other half. The projects gallery does not carry a hand-maintained
 list. At build time it pulls my public repos tagged `portfolio` and renders them, so
 anything craft-factory publishes under that topic appears here the next time the site
-builds. Right now that build is still something I trigger. The obvious next step is to
-run it on a schedule so a Tuesday repo shows up here without me doing anything, and
-that automation is the piece I am working toward rather than something already wired
-up.
+builds. A scheduled GitHub Action runs that refresh weekly — a Tuesday repo shows up
+here without me touching anything: it re-pulls the topic, commits the updated cache
+snapshot only when it actually changed, and pings the deploy hook. The work left is
+observability, not wiring — right now a quiet week and a week where the API has been
+failing look the same from the outside, and I want the failing one to open an issue.
 
 The result I am after is a portfolio where the maintenance is structural, done once,
 instead of a recurring chore. The pipeline makes the work; the site reads it. My job

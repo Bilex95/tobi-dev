@@ -77,4 +77,28 @@
     height: auto;
     border-radius: 8px;
   }
+
+  /* Wide markdown tables scroll inside their own box instead of forcing the
+     page to scroll horizontally on a 375px viewport. `display: block` is what
+     makes `overflow-x` apply to a <table>. */
+  .prose :global(table) {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .prose :global(th),
+  .prose :global(td) {
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .prose :global(th) {
+    background-color: var(--card);
+    font-weight: 600;
+  }
 </style>

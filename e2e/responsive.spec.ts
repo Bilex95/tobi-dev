@@ -1,7 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 const widths = [320, 375, 768, 1024, 1440];
-const routes = ['/', '/work'];
+const routes = [
+  '/',
+  '/work',
+  // Long-form routes: the widest content on the site (markdown tables, <pre>
+  // blocks) lives here, so they are the ones that regress first.
+  '/case-studies/assertkit',
+  '/blog/building-a-portfolio-pipeline',
+];
 
 for (const route of routes) {
   for (const width of widths) {

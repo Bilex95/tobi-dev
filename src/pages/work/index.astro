@@ -18,3 +18,20 @@ const tags = [...new Set(projects.flatMap((p) => p.topics))].filter((t) => t !==
     ))}
   </div>
 </Base>
+
+<style>
+  /* Scoped is fine here: this page has no component test, so the test ESM
+     loader never has to resolve the CSS import a scoped block emits. (The
+     `.card` / `.tag-filter` rules those components need live in global.css.) */
+  h1 {
+    font-size: 2rem;
+    margin: 0;
+  }
+
+  /* Same track sizing as the home page's featured grid. */
+  .grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  }
+</style>

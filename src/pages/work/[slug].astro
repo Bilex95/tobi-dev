@@ -30,3 +30,62 @@ const tags = project.topics.filter((t) => t !== 'portfolio');
     </p>
   </article>
 </Base>
+
+<style>
+  /* Scoped is fine here: no component test renders this page, so the test ESM
+     loader never has to resolve the CSS import a scoped block emits. */
+  .project {
+    /* Readable measure inside the shared `main#main` container (global.css). */
+    max-width: 60rem;
+  }
+
+  .project h1 {
+    font-size: 2rem;
+    margin: 0.5rem 0 0;
+  }
+
+  .blurb {
+    color: var(--fg);
+    font-size: 1.1rem;
+    max-width: 60ch;
+    margin: 1rem 0 0;
+  }
+
+  .project > p {
+    max-width: 60ch;
+  }
+
+  /* Same pills as `.case-study__stack li` and the project cards. */
+  .tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 1.25rem 0 0;
+  }
+
+  .tags li {
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .meta {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin: 1.25rem 0 0;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin: 1.5rem 0 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+</style>

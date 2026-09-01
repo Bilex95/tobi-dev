@@ -85,12 +85,8 @@ const sections = headings.filter((h) => h.depth === 2);
 </article>
 
 <style>
-  .case-study {
-    max-width: 72rem;
-    margin-inline: auto;
-    padding: 2rem 1rem 4rem;
-  }
-
+  /* The page container (max-width / centering / gutters) lives on `main#main`
+     in global.css — this layout only adds its own vertical rhythm. */
   .case-study__head {
     border-bottom: 1px solid var(--border);
     padding-bottom: 1.5rem;
@@ -144,8 +140,20 @@ const sections = headings.filter((h) => h.depth === 2);
     gap: 2.5rem;
   }
 
+  /* Grid items default to `min-width: auto`, which lets a wide child (a
+     markdown table, a long <pre>) push the track past the viewport. Pinning
+     the tracks to 0 lets them shrink and the child scroll instead. */
+  .case-study__body > * {
+    min-width: 0;
+  }
+
+  .case-study__prose {
+    min-width: 0;
+  }
+
   .case-study__toc {
     font-size: 0.9rem;
+    min-width: 0;
   }
 
   .case-study__toc-label {

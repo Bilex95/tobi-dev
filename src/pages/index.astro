@@ -48,7 +48,7 @@ const email = 'sammybilex@gmail.com';
             <p>{cs.data.summary}</p>
             <p class="cs-more">
               <a href={`/case-studies/${cs.data.slug}`}>
-                Read case study<span class="sr-only"> — {cs.data.title}</span>
+                Read case study<span class="visually-hidden"> — {cs.data.title}</span>
               </a>
             </p>
           </li>
@@ -84,7 +84,7 @@ const email = 'sammybilex@gmail.com';
   .grid {
     display: grid;
     gap: 1.25rem;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
   }
   .cs-strip,
   .contact-strip {
@@ -95,7 +95,7 @@ const email = 'sammybilex@gmail.com';
   .cs-strip {
     display: grid;
     gap: 1.25rem;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
   }
   .cs-card {
     border: 1px solid var(--border);
@@ -114,17 +114,8 @@ const email = 'sammybilex@gmail.com';
   .cs-more {
     margin: 0;
   }
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
+  /* Screen-reader-only text uses the shared `.visually-hidden` utility in
+     src/styles/global.css — there is no page-local copy. */
   .contact-strip {
     display: flex;
     flex-wrap: wrap;

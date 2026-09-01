@@ -30,12 +30,8 @@ const posts = (await getCollection('blog'))
 </Base>
 
 <style>
-  .blog {
-    max-width: 72rem;
-    margin-inline: auto;
-    padding: 2rem 1rem 4rem;
-  }
-
+  /* Page container (max-width / centering / gutters) lives on `main#main` in
+     global.css. */
   .blog__list {
     list-style: none;
     padding: 0;

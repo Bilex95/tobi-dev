@@ -1,0 +1,22 @@
+# gitleaks configuration for tobi-dev
+# Run locally / in CI with:  gitleaks detect --no-banner --config .gitleaks.toml
+title = "tobi-dev gitleaks config"
+
+# Start from gitleaks' built-in ruleset, then add project-specific allowlisting.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Project-level false positives (not secrets)"
+
+# Values that look secret-ish to some rules but are safe to commit.
+regexes = [
+  # Public contact address published on the About page — not a credential.
+  '''sammybilex@gmail\.com''',
+]
+
+# Paths that only ever contain binary fixtures, never secrets.
+paths = [
+  # Playwright visual-regression baseline PNGs (opaque binary blobs).
+  '''e2e/visual\.spec\.ts-snapshots/''',
+]

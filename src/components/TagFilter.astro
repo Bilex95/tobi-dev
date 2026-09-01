@@ -11,6 +11,9 @@ const { tags } = Astro.props as Props;
   {tags.map((t) => <button type="button" data-tag={t} aria-pressed="false">{t}</button>)}
 </div>
 
+<!-- Styling lives in src/styles/global.css (.tag-filter): the component-test
+     ESM loader can't resolve the CSS import a scoped <style> block would emit. -->
+
 <script>
   for (const group of document.querySelectorAll<HTMLElement>('[data-tag-filter]')) {
     const buttons = Array.from(group.querySelectorAll<HTMLButtonElement>('button[data-tag]'));

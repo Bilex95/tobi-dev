@@ -22,3 +22,49 @@ const links = [
   </ul>
   <ThemeToggle />
 </nav>
+
+<style>
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1rem;
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.25rem;
+    margin-right: auto;
+    font-weight: 700;
+    color: var(--fg);
+    text-decoration: none;
+  }
+
+  nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  nav ul a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.6rem;
+    text-decoration: none;
+  }
+
+  nav ul a:hover {
+    text-decoration: underline;
+  }
+</style>

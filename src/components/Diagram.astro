@@ -1,8 +1,10 @@
 ---
 /**
  * Diagram — a <figure> wrapper for an inline SVG passed via <slot />.
- * The figure is exposed to assistive tech as a single image labelled by
- * `caption`; the visible <figcaption> repeats the caption for sighted users.
+ * The inner canvas is exposed to assistive tech as a single image labelled by
+ * `caption` (role="img" lives on the div, not the <figure>, since `img` is not
+ * an allowed role on <figure>); the visible <figcaption> repeats the caption
+ * for sighted users.
  */
 interface Props {
   caption: string;
@@ -11,8 +13,8 @@ interface Props {
 const { caption } = Astro.props;
 ---
 
-<figure class="diagram" role="img" aria-label={caption}>
-  <div class="diagram__canvas">
+<figure class="diagram">
+  <div class="diagram__canvas" role="img" aria-label={caption}>
     <slot />
   </div>
   <figcaption>{caption}</figcaption>

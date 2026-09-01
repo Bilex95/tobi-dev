@@ -37,7 +37,7 @@ bypass or the weekly refresh push will be rejected.)
 2. Framework preset auto-detects as **Astro**. Leave build command
    (`astro build`) and output directory (`dist`) at their defaults.
 3. Deploy. Note the assigned `*.vercel.app` URL.
-4. **Production domain is `https://tobi-dev-one.vercel.app`** — claim it under
+4. **Production domain is `https://tobi-dev-bilex95s-projects.vercel.app`** — claim it under
    Settings → Domains (`tobi-dev.vercel.app` was already taken by an unrelated
    account). If you ever move to a different domain, update the hard-coded site
    URL in these four places and redeploy:

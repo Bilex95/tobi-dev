@@ -6,7 +6,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://tobi-dev-one.vercel.app',
+  site: 'https://tobi-dev-bilex95s-projects.vercel.app',
   // global.css imports `@tailwind base` itself, so skip the integration's own base stylesheet.
   integrations: [tailwind({ applyBaseStyles: false }), mdx(), sitemap()],
 });

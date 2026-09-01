@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://tobi-dev-one.vercel.app/sitemap-index.xml
+Sitemap: https://tobi-dev-bilex95s-projects.vercel.app/sitemap-index.xml

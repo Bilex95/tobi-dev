@@ -177,6 +177,22 @@ video {
 }
 
 /* ---------------------------------------------------------------------------
+   Project card (src/components/ProjectCard.astro)
+   Styled globally rather than in a scoped <style> block: the component-test
+   ESM loader cannot resolve the CSS import a scoped block emits on Windows
+   (same constraint as .tag-filter above).
+--------------------------------------------------------------------------- */
+.card h3 {
+  margin: 0 0 0.5rem;
+}
+
+.card h3 a {
+  /* WCAG 2.5.8: give the title link a hit area >= 24px tall. */
+  display: inline-block;
+  padding: 0.2rem 0;
+}
+
+/* ---------------------------------------------------------------------------
    Reduced motion
 --------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {

@@ -166,7 +166,7 @@ host, and that `/og/default.png` and `/favicon.svg` load.
 
 ## 10. Known follow-ups / punch list
 
-- **CV**: no `public/cv/tobi-dev-qa.pdf` exists — the About-page download link is hidden until you commit one, then flip `e2e/about.spec.ts`'s `toHaveCount(0)`→`1`.
+- **CV**: `public/cv/tobi-dev-qa.pdf` is committed (a QA-targeted resume) and the About-page download link is live. Swap the file to update it.
 - **assertkit case study — fact-check before sharing widely.** `src/content/caseStudies/assertkit.mdx` was written from summary notes, not a read of the real repo. The obviously-safe numbers and one commit SHA have already been softened to hedged phrasing, but verify each of these against `C:\Users\HP\Downloads\assertkit` (or the live repo) and restore the specifics if they're right / rewrite if they're wrong:
   - the `generate` stdout format and the `"(N assumptions to check)"` counter (§"What I built");
   - the review-notes file's exact shape (`## Assumptions` heading + AC-2/AC-3 example bullets);

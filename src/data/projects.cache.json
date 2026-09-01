@@ -5,7 +5,12 @@
     "description": "AI-assisted Playwright spec generation and failure triage for CI gating.",
     "url": "https://github.com/Bilex95/assertkit",
     "homepage": null,
-    "topics": ["portfolio", "qa", "playwright", "ai"],
+    "topics": [
+      "portfolio",
+      "qa",
+      "playwright",
+      "ai"
+    ],
     "language": "JavaScript",
     "stars": 0,
     "pushedAt": "2026-08-31T00:00:00Z"
@@ -16,7 +21,12 @@
     "description": "A GitHub Actions pipeline that publishes a portfolio repo on a schedule.",
     "url": "https://github.com/Bilex95/craft-factory",
     "homepage": null,
-    "topics": ["portfolio", "automation", "ci", "github-actions"],
+    "topics": [
+      "portfolio",
+      "automation",
+      "ci",
+      "github-actions"
+    ],
     "language": "JavaScript",
     "stars": 0,
     "pushedAt": "2026-08-24T00:00:00Z"

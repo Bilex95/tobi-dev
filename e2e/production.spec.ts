@@ -2,10 +2,11 @@ import { test, expect } from '@playwright/test';
 
 /**
  * Post-deploy smoke test. NOT part of `npm run test:e2e` — `playwright.config.ts`
- * has `testIgnore: ['**\/production.spec.ts']` so this only runs when invoked
- * explicitly against a real deployment:
+ * has `testIgnore: ['**\/production.spec.ts']`, which excludes this file even when
+ * it is named on the CLI. It runs only through its own config, which has no
+ * `webServer` and no `baseURL`:
  *
- *   PROD_URL=https://<the real url> npx playwright test e2e/production.spec.ts --config playwright.config.ts
+ *   PROD_URL=https://<the real url> npx playwright test --config playwright.prod.config.ts
  *
  * See docs/deploy.md step 8.
  */

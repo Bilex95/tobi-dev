@@ -11,26 +11,25 @@ a Vercel account, and this branch (`build/portfolio-v1`) checked out locally.
 
 ## 1. Create the GitHub repo
 
+Run this exact sequence from the repo root while on `build/portfolio-v1`:
+
 ```bash
+# 1. create the repo and push the current branch
 gh repo create Bilex95/tobi-dev --public --source . --remote origin --push
+
+# 2. create `main` on the remote from this branch's commit, and make it default
+git push origin build/portfolio-v1:main
+gh repo edit Bilex95/tobi-dev --default-branch main
+
+# 3. make your local checkout track main (optional but tidy)
+git branch --move build/portfolio-v1 main
+git branch --set-upstream-to=origin/main main
 ```
 
-That pushes the current branch. Then either open a PR into `main`:
-
-```bash
-git push -u origin build/portfolio-v1
-gh pr create --base main --head build/portfolio-v1 \
-  --title "Portfolio site v1" --body "Astro 5 + Tailwind static portfolio."
-```
-
-…or, if you would rather skip review, push straight to `main`:
-
-```bash
-git branch -m build/portfolio-v1 main   # or: git checkout -b main && git push -u origin main
-git push -u origin main
-```
-
-The rest of this runbook assumes `main` is the production branch.
+The rest of this runbook assumes `main` is the production branch. (If you would
+rather keep a PR-based history, open a PR from a feature branch **after** step 3
+above — but `main` must exist first, and §4's ruleset must carry the Actions-bot
+bypass or the weekly refresh push will be rejected.)
 
 ## 2. Import into Vercel
 
@@ -76,6 +75,19 @@ branch protection) for `main`:
 Leave `visual` unchecked — it is advisory (`continue-on-error`) until Linux
 screenshot baselines are committed (see punch list).
 
+**Add an Actions-bot bypass — required, do this before the first refresh (§7).**
+`.github/workflows/rebuild.yml` does `git commit` + `git push` straight to `main`
+using the built-in `GITHUB_TOKEN`. With "require a pull request" enabled and no
+bypass, that push is rejected and **every** weekly run (and the first
+`workflow_dispatch`) fails at the push step. In the `main` ruleset →
+**Bypass list** → **Add bypass** → add **`Repository admin`** *and* the
+**`github-actions` app** (select role/actor "GitHub Actions"). Save.
+
+- Alternative (only if you refuse to grant a bypass): rework `rebuild.yml` so the
+  cache-refresh step opens a PR (`peter-evans/create-pull-request` or
+  `gh pr create`) instead of pushing — then you must also merge that PR each week.
+  The bypass entry is the recommended path.
+
 ## 5. Tag repos
 
 The gallery only shows repos with the `portfolio` topic:
@@ -112,12 +124,17 @@ In `Bilex95/craft-factory` (a **separate** repo — do this from there, not here
 
 ## 7. First refresh
 
+First confirm §4's **Actions-bot bypass** is in place — without it this run fails
+at the `git push` step.
+
 Kick the weekly workflow manually to populate the cache now instead of waiting
 for Tuesday:
 
 ```bash
 gh workflow run "Refresh projects cache" --repo Bilex95/tobi-dev
-gh run watch --repo Bilex95/tobi-dev
+
+# wait for the run just started (resolves its id — no interactive prompt)
+gh run watch "$(gh run list --workflow='Refresh projects cache' -L1 --json databaseId -q '.[0].databaseId')" --repo Bilex95/tobi-dev
 ```
 
 Confirm the run committed an updated, populated `src/data/projects.cache.json`
@@ -126,10 +143,12 @@ Confirm the run committed an updated, populated `src/data/projects.cache.json`
 ## 8. Post-deploy smoke
 
 `e2e/production.spec.ts` is excluded from the normal `npm run test:e2e` run via
-`testIgnore` in `playwright.config.ts`, so run it explicitly against the live URL:
+`testIgnore` in `playwright.config.ts` (which also excludes it when named on the
+CLI), so it has a dedicated config — `playwright.prod.config.ts` — with no
+`webServer` and no `baseURL`. Run it against the live URL:
 
 ```bash
-PROD_URL=https://<the real url> npx playwright test e2e/production.spec.ts --config playwright.config.ts
+PROD_URL=https://<the real url> npx playwright test --config playwright.prod.config.ts
 ```
 
 It asserts: home returns 200 over HTTPS with a canonical pointing at the real

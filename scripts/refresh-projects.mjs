@@ -41,6 +41,10 @@ async function main() {
   }
 
   const raw = await res.json();
+  if (!Array.isArray(raw)) {
+    console.log('[refresh] unexpected API response shape — leaving cache untouched');
+    return;
+  }
   const snapshot = filterPortfolio(
     raw.filter((r) => !r.fork && !r.private).map(normalizeRepo),
   ).map(({ blurb, thumbnail, featured, ...rest }) => rest); // strip derived fields defensively

@@ -27,6 +27,19 @@ jobs:
       DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The "Commit cache if changed" step below pushes straight to `main`.
+          # `main` has branch protection with required status checks
+          # (unit/e2e/quality/hygiene) and `enforce_admins: false`, so a repo
+          # ADMIN bypasses those checks on a direct push — but the default
+          # GITHUB_TOKEN pushes as `github-actions[bot]`, which is not an admin,
+          # so its push is rejected ("N of N required status checks are
+          # expected"). CACHE_PUSH_TOKEN is a fine-grained PAT on the Bilex95
+          # account, scoped to this repo with Contents: read/write. Pushing with
+          # it authenticates as Bilex95 (an admin), which clears the bypass.
+          # A PAT push also triggers `ci.yml` on `main`, so the refresh commit is
+          # still verified after the fact. See docs/deploy.md §4.
+          token: ${{ secrets.CACHE_PUSH_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22

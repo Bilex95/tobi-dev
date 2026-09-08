@@ -28,8 +28,8 @@ git branch --set-upstream-to=origin/main main
 
 The rest of this runbook assumes `main` is the production branch. (If you would
 rather keep a PR-based history, open a PR from a feature branch **after** step 3
-above — but `main` must exist first, and §4's ruleset must carry the Actions-bot
-bypass or the weekly refresh push will be rejected.)
+above — but `main` must exist first, and §4's `CACHE_PUSH_TOKEN` must be set or
+the weekly refresh push will be rejected.)
 
 ## 2. Import into Vercel
 
@@ -69,20 +69,45 @@ the secret is present; without it that step is a harmless no-op.
   `hygiene`. `visual` is intentionally not required — it is advisory
   (`continue-on-error`) until Linux screenshot baselines land (see punch list).
 - Force-pushes and branch deletion on `main` are blocked.
-- No "require a pull request" rule, and `enforce_admins: false` — so direct
-  pushes to `main` still work for the owner **and** for
-  `.github/workflows/rebuild.yml`'s weekly cache-refresh commit. That is why no
-  Actions-bot bypass is needed.
+- No "require a pull request" rule, and `enforce_admins: false` — so a repo
+  **admin** can push directly to `main`, and required checks then run on that
+  commit after the fact.
 
-Inspect or change it:
+The default `GITHUB_TOKEN` in `.github/workflows/rebuild.yml` pushes as
+`github-actions[bot]`, which is **not** an admin, so `enforce_admins: false`
+does not cover it and its cache-refresh push is rejected with "N of N required
+status checks are expected". The fix is a **fine-grained PAT** that pushes as
+the owner:
+
+1. Create it at github.com → Settings → Developer settings → **Fine-grained
+   personal access tokens** → Generate new token, as `Bilex95`:
+   - **Resource owner:** `Bilex95`
+   - **Repository access:** Only select repositories → `Bilex95/tobi-dev`
+   - **Repository permissions → Contents:** Read and write
+     (Metadata: Read-only is added automatically; nothing else is needed)
+   - **Expiration:** the longest you can (fine-grained PATs cap at 366 days —
+     put a calendar reminder to regenerate, or use "No expiration" if the
+     account allows it)
+2. Add it as an Actions secret:
+
+   ```bash
+   gh secret set CACHE_PUSH_TOKEN --repo Bilex95/tobi-dev
+   # paste the token when prompted
+   ```
+
+`rebuild.yml`'s `actions/checkout` uses this token, so its `git push` lands as
+`Bilex95` and clears the admin bypass. No branch-protection change is required.
+
+Inspect or change protection:
 
 ```bash
 gh api repos/Bilex95/tobi-dev/branches/main/protection
 ```
 
 To make it stricter (a PR for every change), add "Require a pull request before
-merging" in Settings → Branches — but then also add a bypass for the
-`github-actions` actor, or the weekly refresh push to `main` gets rejected.
+merging" in Settings → Branches — then switch `rebuild.yml` to open an
+auto-merging PR (`peter-evans/create-pull-request` + `gh pr merge --auto`)
+instead of pushing, still using `CACHE_PUSH_TOKEN` so the required checks fire.
 
 ## 5. Tag repos
 
@@ -120,8 +145,8 @@ In `Bilex95/craft-factory` (a **separate** repo — do this from there, not here
 
 ## 7. First refresh
 
-First confirm §4's **Actions-bot bypass** is in place — without it this run fails
-at the `git push` step.
+First confirm §4's **`CACHE_PUSH_TOKEN`** secret is set — without it this run
+fails at the `git push` step (`protected branch hook declined`).
 
 Kick the weekly workflow manually to populate the cache now instead of waiting
 for Tuesday:

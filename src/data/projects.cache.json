@@ -1,18 +1,5 @@
 [
   {
-    "slug": "tobi-dev",
-    "name": "tobi-dev",
-    "description": "QA-automation + AI engineer portfolio — static Astro site",
-    "url": "https://github.com/Bilex95/tobi-dev",
-    "homepage": null,
-    "topics": [
-      "portfolio"
-    ],
-    "language": "TypeScript",
-    "stars": 0,
-    "pushedAt": "2026-09-01T12:45:49Z"
-  },
-  {
     "slug": "craft-factory",
     "name": "craft-factory",
     "description": "",
@@ -23,7 +10,20 @@
     ],
     "language": "JavaScript",
     "stars": 0,
-    "pushedAt": "2026-08-31T19:18:16Z"
+    "pushedAt": "2026-09-01T15:45:28Z"
+  },
+  {
+    "slug": "tobi-dev",
+    "name": "tobi-dev",
+    "description": "QA-automation + AI engineer portfolio — static Astro site",
+    "url": "https://github.com/Bilex95/tobi-dev",
+    "homepage": "https://tobi-dev-one.vercel.app",
+    "topics": [
+      "portfolio"
+    ],
+    "language": "TypeScript",
+    "stars": 0,
+    "pushedAt": "2026-09-08T16:07:11Z"
   },
   {
     "slug": "assertkit",
